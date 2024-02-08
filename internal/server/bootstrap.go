@@ -57,12 +57,18 @@ var (
 		Value:   ":8080",
 		EnvVars: []string{"BIND_ADDRESS"},
 	}
+
+	FlagAllowedOrigins = &cli.StringSliceFlag{
+		Name:    "allowed-origins",
+		Usage:   "List of origins that will be allowed to pass CORS checks",
+		EnvVars: []string{"ALLOWED_ORIGINS"},
+	}
 )
 
 func RunApp(ctx *cli.Context) error {
 	log.Println("starting up!")
 
-	log.Println("connecting to MySQL @", ctx.String("db-host"))
+	log.Println("connecting to MySQL @", ctx.String(FlagDatabaseHost.Name))
 	db, err := sqlx.Connect("mysql", makeMySqlConfig(ctx).FormatDSN())
 	if err != nil {
 		return fmt.Errorf("error connecting to MySQL: %s", err)
@@ -85,11 +91,13 @@ func RunApp(ctx *cli.Context) error {
 		institutionController: institutionDelivery.NewInstitutionController(institutionRepo, curriculumRepo),
 		taskController:        taskDelivery.NewTaskController(taskRepo),
 		userController:        userDelivery.NewUserController(userRepo),
+
+		allowedOrigins: allowedOrigins(ctx),
 	}
 
 	log.Println("completed bootstrap process")
 
-	bindAddress := ctx.String("bind-address")
+	bindAddress := ctx.String(FlagBindAddress.Name)
 	log.Println("starting HTTP listener on", bindAddress)
 	app := s.MakeApp()
 	return app.Listen(bindAddress)
@@ -97,11 +105,22 @@ func RunApp(ctx *cli.Context) error {
 
 func makeMySqlConfig(ctx *cli.Context) *mysql.Config {
 	return &mysql.Config{
-		Addr:   ctx.String("db-host"),
-		User:   ctx.String("db-user"),
-		Passwd: ctx.String("db-password"),
-		DBName: ctx.String("db-name"),
+		Addr:   ctx.String(FlagDatabaseHost.Name),
+		User:   ctx.String(FlagDatabaseUser.Name),
+		Passwd: ctx.String(FlagDatabasePassword.Name),
+		DBName: ctx.String(FlagDatabaseName.Name),
 
 		ParseTime: true,
 	}
+}
+
+func allowedOrigins(ctx *cli.Context) map[string]bool {
+	origins := ctx.StringSlice(FlagAllowedOrigins.Name)
+	result := make(map[string]bool, len(origins))
+
+	for _, origin := range origins {
+		result[origin] = true
+	}
+
+	return result
 }

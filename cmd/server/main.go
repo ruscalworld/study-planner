@@ -26,6 +26,7 @@ func main() {
 					server.FlagDatabaseName,
 					server.FlagDatabaseUser,
 					server.FlagDatabasePassword,
+					server.FlagAllowedOrigins,
 				},
 			},
 		},

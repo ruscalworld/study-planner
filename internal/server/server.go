@@ -9,6 +9,7 @@ import (
 
 	"study-planner/pkg/httputil"
 
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/healthcheck"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -22,6 +23,8 @@ type Server struct {
 	institutionController institution.Controller
 	taskController        task.Controller
 	userController        user.Controller
+
+	allowedOrigins map[string]bool
 }
 
 func (s *Server) MakeApp() *fiber.App {
@@ -33,6 +36,10 @@ func (s *Server) MakeApp() *fiber.App {
 		healthcheck.New(),
 		logger.New(),
 		recover.New(),
+
+		cors.New(cors.Config{
+			AllowOriginsFunc: s.isAllowedOrigin,
+		}),
 	)
 
 	app.Route("/v1", func(r fiber.Router) {
@@ -75,4 +82,9 @@ func (s *Server) MakeApp() *fiber.App {
 	})
 
 	return app
+}
+
+func (s *Server) isAllowedOrigin(origin string) bool {
+	_, ok := s.allowedOrigins[origin]
+	return ok
 }

@@ -43,7 +43,7 @@ func (m *MySqlRepository) GetGroup(disciplineId int64, groupId int64) (*task.Gro
 
 func (m *MySqlRepository) GetTasks(disciplineId int64) (*[]task.Task, error) {
 	t := make([]task.Task, 0)
-	err := m.db.Select(&t, "select t.id, t.name, t.external_name, t.description, t.status, t.difficulty, t.deadline from tasks t join task_groups g on t.task_group_id = g.id where g.discipline_id = ?", disciplineId)
+	err := m.db.Select(&t, "select t.id, t.name, t.external_name, t.description, t.task_group_id, t.status, t.difficulty, t.deadline from tasks t join task_groups g on t.task_group_id = g.id where g.discipline_id = ?", disciplineId)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (m *MySqlRepository) GetTasks(disciplineId int64) (*[]task.Task, error) {
 
 func (m *MySqlRepository) GetTask(disciplineId int64, taskId int64) (*task.Task, error) {
 	var t task.Task
-	err := m.db.Get(&t, "select t.id, t.name, t.external_name, t.description, t.status, t.difficulty, t.deadline from tasks t join task_groups g on t.task_group_id = g.id where g.discipline_id = ? and t.id = ?", disciplineId, taskId)
+	err := m.db.Get(&t, "select t.id, t.name, t.external_name, t.description, t.task_group_id, t.status, t.difficulty, t.deadline from tasks t join task_groups g on t.task_group_id = g.id where g.discipline_id = ? and t.id = ?", disciplineId, taskId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, task.ErrUnknownTask

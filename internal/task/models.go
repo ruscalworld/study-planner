@@ -28,6 +28,7 @@ type Task struct {
 	Name         string     `json:"name" db:"name"`
 	ExternalName *string    `json:"externalName" db:"external_name"`
 	Description  *string    `json:"description" db:"description"`
+	GroupID      int64      `json:"groupId" db:"task_group_id"`
 	Status       Status     `json:"status" db:"status"`
 	Difficulty   int        `json:"difficulty" db:"difficulty"`
 	Deadline     *time.Time `json:"deadline" db:"deadline"`

@@ -22,11 +22,20 @@ func main() {
 
 				Flags: []cli.Flag{
 					server.FlagBindAddress,
+					server.FlagAllowedOrigins,
+
 					server.FlagDatabaseHost,
 					server.FlagDatabaseName,
 					server.FlagDatabaseUser,
 					server.FlagDatabasePassword,
-					server.FlagAllowedOrigins,
+
+					server.FlagSigningKey,
+					server.FlagAudience,
+					server.FlagTokenLifetime,
+
+					server.FlagClientId,
+					server.FlagClientSecret,
+					server.FlagRedirectUrl,
 				},
 			},
 		},

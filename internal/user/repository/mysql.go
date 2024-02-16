@@ -17,9 +17,23 @@ func NewMySqlRepository(db *sqlx.DB) *MySqlRepository {
 	return &MySqlRepository{db: db}
 }
 
+func (m *MySqlRepository) GetUserById(userId int64) (*user.User, error) {
+	var u user.User
+	err := m.db.Get(&u, "select id, name, avatar_url, external_id, platform, created_at from users where id = ?", userId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, user.ErrUnknownUser
+		}
+
+		return nil, err
+	}
+
+	return &u, nil
+}
+
 func (m *MySqlRepository) GetUserByExternalId(externalId string) (*user.User, error) {
 	var u user.User
-	err := m.db.Get(&u, "select id, name, avatar_url, external_id, created_at from users where external_id = ?", externalId)
+	err := m.db.Get(&u, "select id, name, avatar_url, external_id, platform, created_at from users where external_id = ?", externalId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, user.ErrUnknownUser
@@ -32,7 +46,10 @@ func (m *MySqlRepository) GetUserByExternalId(externalId string) (*user.User, er
 }
 
 func (m *MySqlRepository) RegisterUser(user *user.User) error {
-	result, err := m.db.Exec("insert into users (name, avatar_url, external_id) values (?, ?, ?)", user.Name, user.AvatarURL, user.ExternalID)
+	result, err := m.db.Exec(
+		"insert into users (name, avatar_url, platform, external_id) values (?, ?, ?, ?)",
+		user.Name, user.AvatarURL, user.Platform, user.ExternalID,
+	)
 	if err != nil {
 		return err
 	}

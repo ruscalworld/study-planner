@@ -1,6 +1,9 @@
 package server
 
 import (
+	"study-planner/internal/auth"
+	"study-planner/internal/auth/delivery"
+
 	"study-planner/internal/curriculum"
 	"study-planner/internal/discipline"
 	"study-planner/internal/institution"
@@ -17,20 +20,24 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type Server struct {
+type Server[AC, AT comparable] struct {
 	curriculumController  curriculum.Controller
 	disciplineController  discipline.Controller
 	institutionController institution.Controller
 	taskController        task.Controller
 	userController        user.Controller
+	authController        auth.Controller[AC, AT]
 
+	authManager    auth.Manager
 	allowedOrigins map[string]bool
 }
 
-func (s *Server) MakeApp() *fiber.App {
+func (s *Server[AC, AT]) MakeApp() *fiber.App {
 	app := fiber.New(fiber.Config{
 		ErrorHandler: httputil.ErrorHandler,
 	})
+
+	authMiddleware := delivery.NewMiddleware(s.authManager)
 
 	app.Use(
 		healthcheck.New(),
@@ -43,6 +50,16 @@ func (s *Server) MakeApp() *fiber.App {
 	)
 
 	app.Route("/v1", func(r fiber.Router) {
+		r.Route("/auth", func(r fiber.Router) {
+			r.Get("/config", httputil.MakeSimpleHandler(s.authController.GetConfig))
+			r.Post("/sign-in", httputil.MakeHandler(s.authController.Authenticate))
+		})
+
+		r.Route("/profile", func(r fiber.Router) {
+			r.Use(authMiddleware)
+			r.Get("/", httputil.MakeSimpleHandler(s.authController.GetCurrentUser))
+		})
+
 		r.Route("/curriculums", func(r fiber.Router) {
 			r.Get("/", httputil.MakeSimpleHandler(s.curriculumController.GetCurriculums))
 
@@ -84,7 +101,7 @@ func (s *Server) MakeApp() *fiber.App {
 	return app
 }
 
-func (s *Server) isAllowedOrigin(origin string) bool {
+func (s *Server[AC, AT]) isAllowedOrigin(origin string) bool {
 	_, ok := s.allowedOrigins[origin]
 	return ok
 }

@@ -40,7 +40,6 @@ func MakeSimpleHandler[O any](endpoint SimpleEndpoint[O]) fiber.Handler {
 
 func handleResponse[O any](ctx *fiber.Ctx, response *O) error {
 	if response != nil {
-
 		return ctx.JSON(response)
 	} else {
 		ctx.Status(fiber.StatusNoContent)

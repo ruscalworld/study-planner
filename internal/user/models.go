@@ -14,6 +14,7 @@ type User struct {
 	ID         int64     `json:"id" db:"id"`
 	Name       string    `json:"name" db:"name"`
 	AvatarURL  string    `json:"avatarUrl" db:"avatar_url"`
+	Platform   string    `json:"platform" db:"platform"`
 	ExternalID string    `json:"externalId" db:"external_id"`
 	CreatedAt  time.Time `json:"createdAt" db:"created_at"`
 }

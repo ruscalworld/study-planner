@@ -28,7 +28,7 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 func unwrapError(err error) error {
 	var e stderrors.WebError
 	if errors.As(err, &e) {
-		return fiber.NewError(e.GetStatusCode(), e.Error())
+		return fiber.NewError(e.GetStatusCode(), e.GetPublicMessage())
 	}
 
 	return err

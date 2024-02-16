@@ -1,6 +1,7 @@
 package user
 
 type Repository interface {
+	GetUserById(userId int64) (*User, error)
 	GetUserByExternalId(externalId string) (*User, error)
 	RegisterUser(user *User) error
 

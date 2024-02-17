@@ -39,3 +39,15 @@ func (a *AuthController[C, T]) Authenticate(ctx *fiber.Ctx, credentials *T) (*au
 
 	return a.authManager.Authenticate(userInfo)
 }
+
+func (a *AuthController[C, T]) Refresh(ctx *fiber.Ctx) (*auth.Token, error) {
+	// Incredibly simple way to refresh token. The only problem this mechanism solves is automatic sign-out if user
+	// do not use app for a long time.
+	userId := ctx.Locals("userid").(int64)
+	u, err := a.userRepository.GetUserById(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return a.authManager.GetTokenProvider().MakeToken(u)
+}

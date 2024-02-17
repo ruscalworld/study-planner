@@ -60,3 +60,7 @@ func (d *Default) Authorize(token *auth.Token) (*auth.TokenInfo, error) {
 
 	return tokenInfo, nil
 }
+
+func (d *Default) GetTokenProvider() auth.TokenProvider {
+	return d.tokenProvider
+}

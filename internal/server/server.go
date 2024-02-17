@@ -53,6 +53,11 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 		r.Route("/auth", func(r fiber.Router) {
 			r.Get("/config", httputil.MakeSimpleHandler(s.authController.GetConfig))
 			r.Post("/sign-in", httputil.MakeHandler(s.authController.Authenticate))
+
+			r.Route("/refresh", func(r fiber.Router) {
+				r.Use(authMiddleware)
+				r.Post("/", httputil.MakeSimpleHandler(s.authController.Refresh))
+			})
 		})
 
 		r.Route("/profile", func(r fiber.Router) {

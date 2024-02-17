@@ -46,6 +46,6 @@ type TaskProgress struct {
 }
 
 type Goal struct {
-	ID           int64 `json:"id" db:"id"`
+	ID           int64 `json:"-" db:"id"`
 	MinCompleted int   `json:"minCompleted" db:"min_completed"`
 }

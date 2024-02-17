@@ -39,3 +39,7 @@ type Link struct {
 	Name string `json:"name" db:"name"`
 	URL  string `json:"url" db:"url"`
 }
+
+type UpdateGoalParams struct {
+	MinCompleted int `json:"minCompleted"`
+}

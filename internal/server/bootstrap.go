@@ -153,7 +153,7 @@ func RunApp(ctx *cli.Context) error {
 		curriculumController:  curriculumDelivery.NewCurriculumController(curriculumRepo),
 		disciplineController:  disciplineDelivery.NewDisciplineController(disciplineRepo),
 		institutionController: institutionDelivery.NewInstitutionController(institutionRepo, curriculumRepo),
-		taskController:        taskDelivery.NewTaskController(taskRepo),
+		taskController:        taskDelivery.NewTaskController(taskRepo, userRepo),
 		userController:        userDelivery.NewUserController(userRepo),
 		authController:        authDelivery.NewAuthController(userRepo, authPlatform, authManager),
 

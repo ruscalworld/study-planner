@@ -63,10 +63,14 @@ func (m *MySqlRepository) RegisterUser(user *user.User) error {
 	return nil
 }
 
-func (m *MySqlRepository) GetGoals(userId int64, taskGroupId int64) (*[]user.Goal, error) {
-	g := make([]user.Goal, 0)
-	err := m.db.Select(&g, "select id, min_completed from user_goals where user_id = ? and task_group_id = ?", userId, taskGroupId)
+func (m *MySqlRepository) GetGoal(userId int64, taskGroupId int64) (*user.Goal, error) {
+	var g user.Goal
+	err := m.db.Get(&g, "select id, min_completed from user_goals where user_id = ? and task_group_id = ?", userId, taskGroupId)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return &user.Goal{}, nil
+		}
+
 		return nil, err
 	}
 

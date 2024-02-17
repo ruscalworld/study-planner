@@ -84,6 +84,12 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 			r.Route("/groups", func(r fiber.Router) {
 				r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTaskGroups))
 				r.Get("/:group_id", httputil.MakeSimpleHandler(s.taskController.GetTaskGroup))
+
+				r.Route("/:group_id/goal", func(r fiber.Router) {
+					r.Use(authMiddleware)
+					r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTaskGroupGoal))
+					r.Put("/", httputil.MakeHandler(s.taskController.UpdateTaskGroupGoal))
+				})
 			})
 
 			r.Route("/tasks", func(r fiber.Router) {

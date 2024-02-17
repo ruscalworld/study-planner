@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"study-planner/internal/task"
+	"study-planner/internal/user"
 	"study-planner/pkg/httputil"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,10 +10,11 @@ import (
 
 type TaskController struct {
 	taskRepository task.Repository
+	userRepository user.Repository
 }
 
-func NewTaskController(taskRepository task.Repository) *TaskController {
-	return &TaskController{taskRepository: taskRepository}
+func NewTaskController(taskRepository task.Repository, userRepository user.Repository) *TaskController {
+	return &TaskController{taskRepository: taskRepository, userRepository: userRepository}
 }
 
 func (c *TaskController) GetTaskGroups(ctx *fiber.Ctx) (*[]task.Group, error) {
@@ -73,4 +75,33 @@ func (c *TaskController) GetTaskLinks(ctx *fiber.Ctx) (*[]task.Link, error) {
 	}
 
 	return c.taskRepository.GetTaskLinks(disciplineId, taskId)
+}
+
+func (c *TaskController) GetTaskGroupGoal(ctx *fiber.Ctx) (*user.Goal, error) {
+	userId := ctx.Locals("userid").(int64)
+	groupId, err := httputil.ExtractId(ctx, "group_id")
+	if err != nil {
+		return nil, err
+	}
+
+	return c.userRepository.GetGoal(userId, groupId)
+}
+
+func (c *TaskController) UpdateTaskGroupGoal(ctx *fiber.Ctx, params *task.UpdateGoalParams) (*user.Goal, error) {
+	userId := ctx.Locals("userid").(int64)
+	groupId, err := httputil.ExtractId(ctx, "group_id")
+	if err != nil {
+		return nil, err
+	}
+
+	g := &user.Goal{
+		MinCompleted: params.MinCompleted,
+	}
+
+	err = c.userRepository.StoreGoal(userId, groupId, g)
+	if err != nil {
+		return nil, err
+	}
+
+	return g, nil
 }

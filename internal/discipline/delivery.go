@@ -11,4 +11,5 @@ type Controller interface {
 	GetDiscipline(ctx *fiber.Ctx) (*Discipline, error)
 	GetDisciplineLinks(ctx *fiber.Ctx) (*[]Link, error)
 	GetDisciplineProgress(ctx *fiber.Ctx) (*[]user.ScopedTaskProgress, error)
+	GetDisciplineStats(ctx *fiber.Ctx) (*user.GenericStats, error)
 }

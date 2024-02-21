@@ -59,3 +59,14 @@ func (c *DisciplineController) GetDisciplineProgress(ctx *fiber.Ctx) (*[]user.Sc
 
 	return c.userRepository.GetDisciplineProgress(userId, disciplineId)
 }
+
+func (c *DisciplineController) GetDisciplineStats(ctx *fiber.Ctx) (*user.GenericStats, error) {
+	userId := ctx.Locals("userid").(int64)
+
+	disciplineId, err := httputil.ExtractId(ctx, "discipline_id")
+	if err != nil {
+		return nil, err
+	}
+
+	return c.userRepository.GetDisciplineStats(userId, disciplineId)
+}

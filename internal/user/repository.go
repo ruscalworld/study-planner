@@ -12,4 +12,5 @@ type Repository interface {
 	GetProgress(userId int64, taskId int64) (*TaskProgress, error)
 	StoreProgress(userId int64, taskId int64, progress *TaskProgress) error
 	GetDisciplineProgress(userId int64, disciplineId int64) (*[]ScopedTaskProgress, error)
+	GetDisciplineStats(userId int64, disciplineId int64) (*GenericStats, error)
 }

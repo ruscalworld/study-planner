@@ -149,3 +149,45 @@ func (m *MySqlRepository) GetDisciplineProgress(userId int64, disciplineId int64
 
 	return &p, nil
 }
+
+const taskGroupStatsQuery = `
+with t_task_statuses as (
+	select 
+	    p.status as status,
+	    count(*) as count
+	from user_task_progress p 
+	    join tasks t on t.id = p.task_id
+	    join task_groups g on g.id = t.task_group_id
+	where p.user_id = ? and g.discipline_id = ?
+	group by p.status
+), t_all_tasks as (
+    select 
+        t.status as status,
+        count(*) as count 
+    from tasks t 
+        join task_groups g on t.task_group_id = g.id
+    where g.discipline_id = ?
+    group by t.status
+), t_goal_tasks as (
+    select ug.min_completed
+    from user_goals ug
+        join task_groups g on g.id = ug.task_group_id
+    where ug.user_id = ? and g.discipline_id = ?
+)
+select 
+    coalesce((select count from t_task_statuses where status = 'Completed'), 0) as completed_tasks,
+    coalesce((select count from t_task_statuses where status in ('InProgress', 'NeedsProtection')), 0) as in_progress_tasks,
+    coalesce((select count from t_all_tasks where status = 'Available'), 0) as available_tasks,
+    coalesce((select sum(count) from t_all_tasks), 0) as total_tasks,
+    coalesce((select * from t_goal_tasks), 0) as goal_tasks
+`
+
+func (m *MySqlRepository) GetDisciplineStats(userId int64, disciplineId int64) (*user.GenericStats, error) {
+	var s user.GenericStats
+	err := m.db.Get(&s, taskGroupStatsQuery, userId, disciplineId, disciplineId, userId, disciplineId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &s, nil
+}

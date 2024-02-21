@@ -60,3 +60,16 @@ type Goal struct {
 	ID           int64 `json:"-" db:"id"`
 	MinCompleted int   `json:"minCompleted" db:"min_completed"`
 }
+
+type TaskGroupStats struct {
+	TaskGroupId int64 `json:"taskGroupId" db:"task_group_id"`
+	GenericStats
+}
+
+type GenericStats struct {
+	CompletedTasks  int `json:"completedTasks" db:"completed_tasks"`
+	InProgressTasks int `json:"inProgressTasks" db:"in_progress_tasks"`
+	GoalTasks       int `json:"goalTasks" db:"goal_tasks"`
+	AvailableTasks  int `json:"availableTasks" db:"available_tasks"`
+	TotalTasks      int `json:"totalTasks" db:"total_tasks"`
+}

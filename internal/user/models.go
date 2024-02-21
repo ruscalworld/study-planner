@@ -38,7 +38,7 @@ const (
 )
 
 type TaskProgress struct {
-	ID          int64      `json:"id" db:"id"`
+	ID          int64      `json:"-" db:"id"`
 	Status      TaskStatus `json:"status" db:"status"`
 	Grade       *Grade     `json:"grade" db:"grade"`
 	StartedAt   *time.Time `json:"startedAt" db:"started_at"`

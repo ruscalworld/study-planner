@@ -99,3 +99,38 @@ func (m *MySqlRepository) DeleteGoal(userId int64, taskGroupId int64, goalId int
 	_, err := m.db.Exec("delete from user_goals where user_id = ? and task_group_id = ? and id = ?", userId, taskGroupId, goalId)
 	return err
 }
+
+func (m *MySqlRepository) GetProgress(userId int64, taskId int64) (*user.TaskProgress, error) {
+	var p user.TaskProgress
+	err := m.db.Get(&p,
+		"select id, status, grade, started_at, completed_at from user_task_progress where user_id = ? and task_id = ?",
+		userId, taskId,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return &user.TaskProgress{Status: user.TaskStatusNotStarted}, nil
+		}
+
+		return nil, err
+	}
+
+	return &p, nil
+}
+
+func (m *MySqlRepository) StoreProgress(userId int64, taskId int64, progress *user.TaskProgress) error {
+	result, err := m.db.Exec(
+		"insert into user_task_progress (user_id, task_id, status, grade, started_at, completed_at) values (?, ?, ?, ?, ?, ?) on duplicate key update status = ?, grade = ?, started_at = ?, completed_at = ?",
+		userId, taskId, progress.Status, progress.Grade, progress.StartedAt, progress.CompletedAt, progress.Status, progress.Grade, progress.StartedAt, progress.CompletedAt,
+	)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	progress.ID = id
+	return nil
+}

@@ -1,6 +1,7 @@
 package task
 
 import (
+	"study-planner/internal/user"
 	"time"
 
 	"study-planner/pkg/stderrors"
@@ -42,4 +43,9 @@ type Link struct {
 
 type UpdateGoalParams struct {
 	MinCompleted int `json:"minCompleted"`
+}
+
+type UpdateProgressParams struct {
+	Status user.TaskStatus `json:"status"`
+	Grade  *user.Grade     `json:"grade"`
 }

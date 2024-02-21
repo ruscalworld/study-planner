@@ -96,6 +96,12 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 				r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTasks))
 				r.Get("/:task_id", httputil.MakeSimpleHandler(s.taskController.GetTask))
 				r.Get("/:task_id/links", httputil.MakeSimpleHandler(s.taskController.GetTaskLinks))
+
+				r.Route("/:task_id/progress", func(r fiber.Router) {
+					r.Use(authMiddleware)
+					r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTaskProgress))
+					r.Put("/", httputil.MakeHandler(s.taskController.UpdateTaskProgress))
+				})
 			})
 		})
 

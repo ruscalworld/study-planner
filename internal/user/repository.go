@@ -8,4 +8,7 @@ type Repository interface {
 	GetGoal(userId int64, taskGroupId int64) (*Goal, error)
 	StoreGoal(userId int64, taskGroupId int64, goal *Goal) error
 	DeleteGoal(userId int64, taskGroupId int64, goalId int64) error
+
+	GetProgress(userId int64, taskId int64) (*TaskProgress, error)
+	StoreProgress(userId int64, taskId int64, progress *TaskProgress) error
 }

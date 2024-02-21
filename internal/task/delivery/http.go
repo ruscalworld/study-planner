@@ -130,10 +130,12 @@ func (c *TaskController) UpdateTaskProgress(ctx *fiber.Ctx, params *task.UpdateP
 	}
 
 	p := &user.TaskProgress{
-		Status:      params.Status,
-		Grade:       params.Grade,
-		StartedAt:   oldProgress.StartedAt,
-		CompletedAt: oldProgress.CompletedAt,
+		GenericTaskProgress: user.GenericTaskProgress{
+			Status:      params.Status,
+			Grade:       params.Grade,
+			StartedAt:   oldProgress.StartedAt,
+			CompletedAt: oldProgress.CompletedAt,
+		},
 	}
 
 	now := time.Now()

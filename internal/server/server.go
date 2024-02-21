@@ -81,6 +81,11 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 		r.Route("/disciplines/:discipline_id", func(r fiber.Router) {
 			r.Get("/links", httputil.MakeSimpleHandler(s.disciplineController.GetDisciplineLinks))
 
+			r.Route("/progress", func(r fiber.Router) {
+				r.Use(authMiddleware)
+				r.Get("/", httputil.MakeSimpleHandler(s.disciplineController.GetDisciplineProgress))
+			})
+
 			r.Route("/groups", func(r fiber.Router) {
 				r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTaskGroups))
 				r.Get("/:group_id", httputil.MakeSimpleHandler(s.taskController.GetTaskGroup))

@@ -108,7 +108,9 @@ func (m *MySqlRepository) GetProgress(userId int64, taskId int64) (*user.TaskPro
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return &user.TaskProgress{Status: user.TaskStatusNotStarted}, nil
+			return &user.TaskProgress{
+				GenericTaskProgress: user.GenericTaskProgress{Status: user.TaskStatusNotStarted},
+			}, nil
 		}
 
 		return nil, err
@@ -133,4 +135,17 @@ func (m *MySqlRepository) StoreProgress(userId int64, taskId int64, progress *us
 
 	progress.ID = id
 	return nil
+}
+
+func (m *MySqlRepository) GetDisciplineProgress(userId int64, disciplineId int64) (*[]user.ScopedTaskProgress, error) {
+	p := make([]user.ScopedTaskProgress, 0)
+	err := m.db.Select(&p,
+		"select p.id, p.task_id, t.task_group_id, p.status, p.grade, p.started_at, p.completed_at from user_task_progress p join tasks t on t.id = p.task_id join task_groups g on g.id = t.task_group_id where p.user_id = ? and g.discipline_id = ?",
+		userId, disciplineId,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &p, nil
 }

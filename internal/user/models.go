@@ -38,11 +38,22 @@ const (
 )
 
 type TaskProgress struct {
-	ID          int64      `json:"-" db:"id"`
+	ID int64 `json:"-" db:"id"`
+	GenericTaskProgress
+}
+
+type GenericTaskProgress struct {
 	Status      TaskStatus `json:"status" db:"status"`
 	Grade       *Grade     `json:"grade" db:"grade"`
 	StartedAt   *time.Time `json:"startedAt" db:"started_at"`
 	CompletedAt *time.Time `json:"completedAt" db:"completed_at"`
+}
+
+type ScopedTaskProgress struct {
+	ID          int64 `json:"-" db:"id"`
+	TaskId      int64 `json:"taskId" db:"task_id"`
+	TaskGroupId int64 `json:"taskGroupId" db:"task_group_id"`
+	GenericTaskProgress
 }
 
 type Goal struct {

@@ -172,6 +172,7 @@ func RunApp(ctx *cli.Context) error {
 func makeMySqlConfig(ctx *cli.Context) *mysql.Config {
 	config := mysql.NewConfig()
 
+	config.Net = "tcp"
 	config.Addr = ctx.String(FlagDatabaseHost.Name)
 	config.User = ctx.String(FlagDatabaseUser.Name)
 	config.Passwd = ctx.String(FlagDatabasePassword.Name)

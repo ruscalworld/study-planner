@@ -170,14 +170,15 @@ func RunApp(ctx *cli.Context) error {
 }
 
 func makeMySqlConfig(ctx *cli.Context) *mysql.Config {
-	return &mysql.Config{
-		Addr:   ctx.String(FlagDatabaseHost.Name),
-		User:   ctx.String(FlagDatabaseUser.Name),
-		Passwd: ctx.String(FlagDatabasePassword.Name),
-		DBName: ctx.String(FlagDatabaseName.Name),
+	config := mysql.NewConfig()
 
-		ParseTime: true,
-	}
+	config.Addr = ctx.String(FlagDatabaseHost.Name)
+	config.User = ctx.String(FlagDatabaseUser.Name)
+	config.Passwd = ctx.String(FlagDatabasePassword.Name)
+	config.DBName = ctx.String(FlagDatabaseName.Name)
+	config.ParseTime = true
+
+	return config
 }
 
 func allowedOrigins(ctx *cli.Context) map[string]bool {

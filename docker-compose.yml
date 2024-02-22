@@ -2,7 +2,8 @@ version: '3.8'
 
 services:
   backend:
-    image: ruscalworld/study-planner:latest
+    image: ruscalworld/study-planner:main
+    command: serve
     restart: always
     depends_on:
       - mariadb

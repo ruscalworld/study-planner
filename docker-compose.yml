@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    image: ruscalworld/study-planner:latest
+    restart: always
+    depends_on:
+      - mariadb
+    environment:
+      DB_HOST: mariadb
+      DB_USER: root
+      DB_PASSWORD: some-example-password
+      DB_NAME: study_planner
+      BIND_ADDRESS: :8080
+    env_file: .env.example
+    ports:
+      - '8080:8080'
+
+  mariadb:
+    image: mariadb:latest
+    restart: always
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    environment:
+      MARIADB_DATABASE: study_planner
+      MARIADB_ROOT_PASSWORD: some-example-password
+
+volumes:
+  mariadb-data:

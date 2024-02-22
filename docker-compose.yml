@@ -12,7 +12,7 @@ services:
       DB_PASSWORD: some-example-password
       DB_NAME: study_planner
       BIND_ADDRESS: :8080
-    env_file: .env.example
+    env_file: .env
     ports:
       - '8080:8080'
 

@@ -176,7 +176,7 @@ with t_task_statuses as (
 )
 select 
     coalesce((select count from t_task_statuses where status = 'Completed'), 0) as completed_tasks,
-    coalesce((select count from t_task_statuses where status in ('InProgress', 'NeedsProtection')), 0) as in_progress_tasks,
+    coalesce((select sum(count) from t_task_statuses where status in ('InProgress', 'NeedsProtection')), 0) as in_progress_tasks,
     coalesce((select count from t_all_tasks where status = 'Available'), 0) as available_tasks,
     coalesce((select sum(count) from t_all_tasks), 0) as total_tasks,
     coalesce((select * from t_goal_tasks), 0) as goal_tasks

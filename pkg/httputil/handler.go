@@ -2,6 +2,7 @@ package httputil
 
 import (
 	"encoding/json"
+
 	"github.com/gofiber/fiber/v2"
 )
 

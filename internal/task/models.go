@@ -1,9 +1,9 @@
 package task
 
 import (
-	"github.com/ruscalworld/study-planner/internal/user"
 	"time"
 
+	"github.com/ruscalworld/study-planner/internal/user"
 	"github.com/ruscalworld/study-planner/pkg/stderrors"
 )
 

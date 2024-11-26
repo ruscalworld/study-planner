@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"study-planner/internal/auth"
+	"github.com/ruscalworld/study-planner/internal/auth"
 
 	"golang.org/x/oauth2"
 )

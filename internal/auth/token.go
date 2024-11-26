@@ -3,7 +3,7 @@ package auth
 import (
 	"time"
 
-	"study-planner/internal/user"
+	"github.com/ruscalworld/study-planner/internal/user"
 )
 
 type TokenType string

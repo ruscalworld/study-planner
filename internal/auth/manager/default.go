@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"study-planner/internal/auth"
-	"study-planner/internal/user"
+	"github.com/ruscalworld/study-planner/internal/auth"
+	"github.com/ruscalworld/study-planner/internal/user"
 )
 
 type Default struct {

@@ -3,9 +3,9 @@ package delivery
 import (
 	"time"
 
-	"study-planner/internal/task"
-	"study-planner/internal/user"
-	"study-planner/pkg/httputil"
+	"github.com/ruscalworld/study-planner/internal/task"
+	"github.com/ruscalworld/study-planner/internal/user"
+	"github.com/ruscalworld/study-planner/pkg/httputil"
 
 	"github.com/gofiber/fiber/v2"
 )

@@ -1,9 +1,9 @@
 package delivery
 
 import (
-	"study-planner/internal/auth"
-	"study-planner/internal/user"
-	"study-planner/pkg/stderrors"
+	"github.com/ruscalworld/study-planner/internal/auth"
+	"github.com/ruscalworld/study-planner/internal/user"
+	"github.com/ruscalworld/study-planner/pkg/stderrors"
 
 	"github.com/gofiber/fiber/v2"
 )

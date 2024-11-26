@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"study-planner/internal/institution"
+	"github.com/ruscalworld/study-planner/internal/institution"
 
 	"github.com/jmoiron/sqlx"
 )

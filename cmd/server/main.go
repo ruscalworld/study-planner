@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"study-planner/internal/server"
+	"github.com/ruscalworld/study-planner/internal/server"
 
 	"github.com/urfave/cli/v2"
 )

@@ -1,9 +1,9 @@
 package delivery
 
 import (
-	"study-planner/internal/curriculum"
-	"study-planner/internal/institution"
-	"study-planner/pkg/httputil"
+	"github.com/ruscalworld/study-planner/internal/curriculum"
+	"github.com/ruscalworld/study-planner/internal/institution"
+	"github.com/ruscalworld/study-planner/pkg/httputil"
 
 	"github.com/gofiber/fiber/v2"
 )

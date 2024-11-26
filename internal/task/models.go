@@ -1,10 +1,10 @@
 package task
 
 import (
-	"study-planner/internal/user"
+	"github.com/ruscalworld/study-planner/internal/user"
 	"time"
 
-	"study-planner/pkg/stderrors"
+	"github.com/ruscalworld/study-planner/pkg/stderrors"
 )
 
 var (

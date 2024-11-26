@@ -1,7 +1,7 @@
 package discipline
 
 import (
-	"study-planner/internal/user"
+	"github.com/ruscalworld/study-planner/internal/user"
 
 	"github.com/gofiber/fiber/v2"
 )

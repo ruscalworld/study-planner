@@ -1,7 +1,7 @@
 package institution
 
 import (
-	"study-planner/internal/curriculum"
+	"github.com/ruscalworld/study-planner/internal/curriculum"
 
 	"github.com/gofiber/fiber/v2"
 )

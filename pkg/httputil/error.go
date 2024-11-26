@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 
-	"study-planner/pkg/stderrors"
+	"github.com/ruscalworld/study-planner/pkg/stderrors"
 
 	"github.com/gofiber/fiber/v2"
 )

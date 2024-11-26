@@ -3,7 +3,7 @@ package platform
 import (
 	"fmt"
 
-	"study-planner/internal/auth"
+	"github.com/ruscalworld/study-planner/internal/auth"
 
 	"github.com/bwmarrin/discordgo"
 	"golang.org/x/oauth2"

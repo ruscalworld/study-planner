@@ -1,7 +1,7 @@
 package curriculum
 
 import (
-	"study-planner/pkg/stderrors"
+	"github.com/ruscalworld/study-planner/pkg/stderrors"
 )
 
 var (

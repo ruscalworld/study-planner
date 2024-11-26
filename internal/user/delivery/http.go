@@ -1,6 +1,6 @@
 package delivery
 
-import "study-planner/internal/user"
+import "github.com/ruscalworld/study-planner/internal/user"
 
 type UserController struct {
 	userRepository user.Repository

@@ -20,4 +20,5 @@ type Repository interface {
 
 	GetUserCurriculums(userId int64) (*[]Curriculum, error)
 	CreateUserCurriculum(userId int64, curriculumId int64, role access.Role) error
+	DeleteUserCurriculum(userId int64, curriculumId int64) error
 }

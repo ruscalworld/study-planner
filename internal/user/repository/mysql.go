@@ -211,3 +211,8 @@ func (m *MySqlRepository) CreateUserCurriculum(userId int64, curriculumId int64,
 	_, err := m.db.Exec("insert into user_curriculums (user_id, curriculum_id, role) values (?, ?, ?) on duplicate key update role = ?", userId, curriculumId, role, role)
 	return err
 }
+
+func (m *MySqlRepository) DeleteUserCurriculum(userId int64, curriculumId int64) error {
+	_, err := m.db.Exec("delete from user_curriculums where user_id = ? and curriculum_id = ?", userId, curriculumId)
+	return err
+}

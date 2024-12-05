@@ -6,6 +6,7 @@ import (
 	"github.com/ruscalworld/study-planner/internal/auth"
 	"github.com/ruscalworld/study-planner/internal/curriculum"
 	"github.com/ruscalworld/study-planner/internal/user"
+	"github.com/ruscalworld/study-planner/pkg/httputil"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -52,5 +53,21 @@ func (c *UserController) CreateUserCurriculum(ctx *fiber.Ctx, request *user.Crea
 		ctx.Status(fiber.StatusNoContent)
 	}
 
+	return nil, nil
+}
+
+func (c *UserController) DeleteUserCurriculum(ctx *fiber.Ctx) (*any, error) {
+	userId := ctx.Locals("userid").(int64)
+	curriculumIdd, err := httputil.ExtractId(ctx, "curriculum_id")
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.userRepository.DeleteUserCurriculum(userId, curriculumIdd)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx.Status(fiber.StatusNoContent)
 	return nil, nil
 }

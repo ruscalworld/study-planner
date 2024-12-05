@@ -64,7 +64,7 @@ func (m *MySqlRepository) GetInstitutionCurriculums(institutionId int64) (*[]cur
 
 func (m *MySqlRepository) GetCurriculumCodes(curriculumId int64) (*[]curriculum.Code, error) {
 	c := make([]curriculum.Code, 0)
-	err := m.db.Select(&c, "select id, code, role, curriculum_id from curriculum_codes where curriculum_id = ?", curriculumId)
+	err := m.db.Select(&c, "select id, code, role, curriculum_id, id, code, role, curriculum_id, user_id, expires_at, created_at from curriculum_codes where curriculum_id = ? and expires_at > current_timestamp", curriculumId)
 	if err != nil {
 		return nil, err
 	}

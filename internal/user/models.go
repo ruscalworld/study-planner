@@ -3,11 +3,14 @@ package user
 import (
 	"time"
 
+	"github.com/ruscalworld/study-planner/internal/access"
+	"github.com/ruscalworld/study-planner/internal/curriculum"
 	"github.com/ruscalworld/study-planner/pkg/stderrors"
 )
 
 var (
-	ErrUnknownUser = stderrors.NotFound("unknown user")
+	ErrUnknownUser        = stderrors.NotFound("unknown user")
+	ErrNoCurriculumAccess = stderrors.Forbidden("no curriculum access")
 )
 
 type User struct {
@@ -72,4 +75,13 @@ type GenericStats struct {
 	GoalTasks       int `json:"goalTasks" db:"goal_tasks"`
 	AvailableTasks  int `json:"availableTasks" db:"available_tasks"`
 	TotalTasks      int `json:"totalTasks" db:"total_tasks"`
+}
+
+type CreateUserCurriculumParams struct {
+	Code string `json:"code"`
+}
+
+type Curriculum struct {
+	curriculum.Curriculum
+	access.CurriculumPrivileges
 }

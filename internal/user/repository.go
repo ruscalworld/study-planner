@@ -1,5 +1,9 @@
 package user
 
+import (
+	"github.com/ruscalworld/study-planner/internal/access"
+)
+
 type Repository interface {
 	GetUserById(userId int64) (*User, error)
 	GetUserByExternalId(externalId string) (*User, error)
@@ -13,4 +17,7 @@ type Repository interface {
 	StoreProgress(userId int64, taskId int64, progress *TaskProgress) error
 	GetDisciplineProgress(userId int64, disciplineId int64) (*[]ScopedTaskProgress, error)
 	GetDisciplineStats(userId int64, disciplineId int64) (*GenericStats, error)
+
+	GetUserCurriculums(userId int64) (*[]Curriculum, error)
+	CreateUserCurriculum(userId int64, curriculumId int64, role access.Role) error
 }

@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/ruscalworld/study-planner/internal/access"
+	"github.com/ruscalworld/study-planner/internal/auth"
 	"github.com/ruscalworld/study-planner/internal/discipline"
 
 	"github.com/jmoiron/sqlx"
@@ -49,4 +51,19 @@ func (m *MySqlRepository) GetDisciplineLinks(id int64) (*[]discipline.Link, erro
 	}
 
 	return &l, nil
+}
+
+func (m *MySqlRepository) GetCurriculumPrivileges(disciplineId int64, userId int64) (*access.CurriculumPrivileges, error) {
+	var cp access.CurriculumPrivileges
+	err := m.db.Get(&cp, "select c.id as curriculum_id, uc.role as role from  disciplines d join curriculums c on d.curriculum_id = c.id join user_curriculums uc on c.id = uc.curriculum_id where d.id = ? and uc.user_id = ?", disciplineId, userId)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, auth.ErrNoPrivileges
+		}
+
+		return nil, err
+	}
+
+	return &cp, nil
 }

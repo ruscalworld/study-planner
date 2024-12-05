@@ -3,24 +3,41 @@ package delivery
 import (
 	"time"
 
+	"github.com/ruscalworld/study-planner/internal/auth"
+	"github.com/ruscalworld/study-planner/internal/discipline"
 	"github.com/ruscalworld/study-planner/internal/task"
 	"github.com/ruscalworld/study-planner/internal/user"
+
 	"github.com/ruscalworld/study-planner/pkg/httputil"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 type TaskController struct {
-	taskRepository task.Repository
-	userRepository user.Repository
+	disciplineRepository discipline.Repository
+	taskRepository       task.Repository
+	userRepository       user.Repository
 }
 
-func NewTaskController(taskRepository task.Repository, userRepository user.Repository) *TaskController {
-	return &TaskController{taskRepository: taskRepository, userRepository: userRepository}
+func NewTaskController(
+	disciplineRepository discipline.Repository,
+	taskRepository task.Repository,
+	userRepository user.Repository,
+) *TaskController {
+	return &TaskController{
+		disciplineRepository: disciplineRepository,
+		taskRepository:       taskRepository,
+		userRepository:       userRepository,
+	}
 }
 
 func (c *TaskController) GetTaskGroups(ctx *fiber.Ctx) (*[]task.Group, error) {
 	disciplineId, err := httputil.ExtractId(ctx, "discipline_id")
+	if err != nil {
+		return nil, err
+	}
+
+	err = auth.Authorize(ctx, c.disciplineRepository.GetCurriculumPrivileges, auth.LevelPublic, auth.ActionRead, disciplineId)
 	if err != nil {
 		return nil, err
 	}
@@ -34,6 +51,11 @@ func (c *TaskController) GetTaskGroup(ctx *fiber.Ctx) (*task.Group, error) {
 		return nil, err
 	}
 
+	err = auth.Authorize(ctx, c.disciplineRepository.GetCurriculumPrivileges, auth.LevelPublic, auth.ActionRead, disciplineId)
+	if err != nil {
+		return nil, err
+	}
+
 	groupId, err := httputil.ExtractId(ctx, "group_id")
 	if err != nil {
 		return nil, err
@@ -43,6 +65,16 @@ func (c *TaskController) GetTaskGroup(ctx *fiber.Ctx) (*task.Group, error) {
 }
 
 func (c *TaskController) GetTaskGroupGoal(ctx *fiber.Ctx) (*user.Goal, error) {
+	disciplineId, err := httputil.ExtractId(ctx, "discipline_id")
+	if err != nil {
+		return nil, err
+	}
+
+	err = auth.Authorize(ctx, c.disciplineRepository.GetCurriculumPrivileges, auth.LevelPublic, auth.ActionRead, disciplineId)
+	if err != nil {
+		return nil, err
+	}
+
 	userId := ctx.Locals("userid").(int64)
 	groupId, err := httputil.ExtractId(ctx, "group_id")
 	if err != nil {
@@ -53,6 +85,16 @@ func (c *TaskController) GetTaskGroupGoal(ctx *fiber.Ctx) (*user.Goal, error) {
 }
 
 func (c *TaskController) UpdateTaskGroupGoal(ctx *fiber.Ctx, params *task.UpdateGoalParams) (*user.Goal, error) {
+	disciplineId, err := httputil.ExtractId(ctx, "discipline_id")
+	if err != nil {
+		return nil, err
+	}
+
+	err = auth.Authorize(ctx, c.disciplineRepository.GetCurriculumPrivileges, auth.LevelPublic, auth.ActionRead, disciplineId)
+	if err != nil {
+		return nil, err
+	}
+
 	userId := ctx.Locals("userid").(int64)
 	groupId, err := httputil.ExtractId(ctx, "group_id")
 	if err != nil {
@@ -77,6 +119,11 @@ func (c *TaskController) GetTasks(ctx *fiber.Ctx) (*[]task.Task, error) {
 		return nil, err
 	}
 
+	err = auth.Authorize(ctx, c.disciplineRepository.GetCurriculumPrivileges, auth.LevelPublic, auth.ActionRead, disciplineId)
+	if err != nil {
+		return nil, err
+	}
+
 	return c.taskRepository.GetTasks(disciplineId)
 }
 
@@ -91,7 +138,17 @@ func (c *TaskController) GetTask(ctx *fiber.Ctx) (*task.Task, error) {
 		return nil, err
 	}
 
-	return c.taskRepository.GetTask(disciplineId, taskId)
+	t, err := c.taskRepository.GetTask(disciplineId, taskId)
+	if err != nil {
+		return nil, err
+	}
+
+	err = auth.Authorize(ctx, c.taskRepository.GetCurriculumPrivileges, auth.LevelPublic, auth.ActionRead, t.GroupID)
+	if err != nil {
+		return nil, err
+	}
+
+	return t, nil
 }
 
 func (c *TaskController) GetTaskLinks(ctx *fiber.Ctx) (*[]task.Link, error) {
@@ -105,12 +162,37 @@ func (c *TaskController) GetTaskLinks(ctx *fiber.Ctx) (*[]task.Link, error) {
 		return nil, err
 	}
 
+	t, err := c.taskRepository.GetTask(disciplineId, taskId)
+	if err != nil {
+		return nil, err
+	}
+
+	err = auth.Authorize(ctx, c.taskRepository.GetCurriculumPrivileges, auth.LevelPublic, auth.ActionRead, t.GroupID)
+	if err != nil {
+		return nil, err
+	}
+
 	return c.taskRepository.GetTaskLinks(disciplineId, taskId)
 }
 
 func (c *TaskController) GetTaskProgress(ctx *fiber.Ctx) (*user.TaskProgress, error) {
+	disciplineId, err := httputil.ExtractId(ctx, "discipline_id")
+	if err != nil {
+		return nil, err
+	}
+
 	userId := ctx.Locals("userid").(int64)
 	taskId, err := httputil.ExtractId(ctx, "task_id")
+	if err != nil {
+		return nil, err
+	}
+
+	t, err := c.taskRepository.GetTask(disciplineId, taskId)
+	if err != nil {
+		return nil, err
+	}
+
+	err = auth.Authorize(ctx, c.taskRepository.GetCurriculumPrivileges, auth.LevelPublic, auth.ActionRead, t.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -119,8 +201,23 @@ func (c *TaskController) GetTaskProgress(ctx *fiber.Ctx) (*user.TaskProgress, er
 }
 
 func (c *TaskController) UpdateTaskProgress(ctx *fiber.Ctx, params *task.UpdateProgressParams) (*user.TaskProgress, error) {
+	disciplineId, err := httputil.ExtractId(ctx, "discipline_id")
+	if err != nil {
+		return nil, err
+	}
+
 	userId := ctx.Locals("userid").(int64)
 	taskId, err := httputil.ExtractId(ctx, "task_id")
+	if err != nil {
+		return nil, err
+	}
+
+	t, err := c.taskRepository.GetTask(disciplineId, taskId)
+	if err != nil {
+		return nil, err
+	}
+
+	err = auth.Authorize(ctx, c.taskRepository.GetCurriculumPrivileges, auth.LevelPublic, auth.ActionRead, t.GroupID)
 	if err != nil {
 		return nil, err
 	}

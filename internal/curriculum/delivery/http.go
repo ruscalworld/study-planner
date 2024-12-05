@@ -60,11 +60,11 @@ func (c *CurriculumController) CreateCurriculumCode(ctx *fiber.Ctx, request *cur
 	}
 
 	if !request.Role.IsValid() {
-		return nil, stderrors.BadRequest("invalid role")
+		return nil, stderrors.UnprocessableEntity("invalid role")
 	}
 
 	if request.ExpiresAt.Before(time.Now()) {
-		return nil, stderrors.BadRequest("expiry date must be in future")
+		return nil, stderrors.UnprocessableEntity("expiry date must be in future")
 	}
 
 	cd := &curriculum.Code{

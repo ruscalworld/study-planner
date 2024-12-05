@@ -5,6 +5,7 @@ import (
 
 	"github.com/ruscalworld/study-planner/internal/auth"
 	"github.com/ruscalworld/study-planner/internal/curriculum"
+
 	"github.com/ruscalworld/study-planner/pkg/code"
 	"github.com/ruscalworld/study-planner/pkg/httputil"
 	"github.com/ruscalworld/study-planner/pkg/stderrors"
@@ -82,4 +83,29 @@ func (c *CurriculumController) CreateCurriculumCode(ctx *fiber.Ctx, request *cur
 	}
 
 	return cd, nil
+}
+
+func (c *CurriculumController) DeleteCurriculumCode(ctx *fiber.Ctx) (*any, error) {
+	curriculumId, err := httputil.ExtractId(ctx, "curriculum_id")
+	if err != nil {
+		return nil, err
+	}
+
+	codeId, err := httputil.ExtractId(ctx, "code_id")
+	if err != nil {
+		return nil, err
+	}
+
+	err = auth.Authorize(ctx, c.curriculumRepository.GetCurriculumPrivileges, auth.LevelSecure, auth.ActionCreate, curriculumId)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.curriculumRepository.DeleteCurriculumCode(codeId)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx.Status(fiber.StatusNoContent)
+	return nil, nil
 }

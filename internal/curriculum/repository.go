@@ -14,5 +14,6 @@ type Repository interface {
 
 	GetCurriculumPrivileges(curriculumId int64, userId int64) (*access.CurriculumPrivileges, error)
 	GetCurriculumUsers(curriculumId int64) (*[]User, error)
+	UpdateCurriculumUser(curriculumId int64, userId int64, role access.Role) error
 	DeleteCurriculumUser(curriculumId int64, userId int64) error
 }

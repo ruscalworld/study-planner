@@ -8,7 +8,8 @@ import (
 )
 
 var (
-	ErrUnknownCurriculum = stderrors.NotFound("unknown curriculum")
+	ErrUnknownCurriculum     = stderrors.NotFound("unknown curriculum")
+	ErrUnknownCurriculumUser = stderrors.NotFound("unknown curriculum user")
 )
 
 type Curriculum struct {
@@ -42,4 +43,8 @@ type User struct {
 	Name      string      `json:"name" db:"name"`
 	AvatarUrl string      `json:"avatarUrl" db:"avatar_url"`
 	Role      access.Role `json:"role" db:"role"`
+}
+
+type UpdateCurriculumUserParams struct {
+	Role access.Role `json:"role"`
 }

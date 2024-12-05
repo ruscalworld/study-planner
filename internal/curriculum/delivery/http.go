@@ -124,6 +124,40 @@ func (c *CurriculumController) GetCurriculumUsers(ctx *fiber.Ctx) (*[]curriculum
 	return c.curriculumRepository.GetCurriculumUsers(id)
 }
 
+func (c *CurriculumController) UpdateCurriculumUser(ctx *fiber.Ctx, params *curriculum.UpdateCurriculumUserParams) (*any, error) {
+	curriculumId, err := httputil.ExtractId(ctx, "curriculum_id")
+	if err != nil {
+		return nil, err
+	}
+
+	userId, err := httputil.ExtractId(ctx, "user_id")
+	if err != nil {
+		return nil, err
+	}
+
+	currentUserId := ctx.Locals("userid").(int64)
+	if currentUserId == userId {
+		return nil, stderrors.Conflict("you cannot alter yourself")
+	}
+
+	if !params.Role.IsValid() {
+		return nil, stderrors.UnprocessableEntity("invalid role")
+	}
+
+	err = auth.Authorize(ctx, c.curriculumRepository.GetCurriculumPrivileges, auth.LevelSecure, auth.ActionUpdate, curriculumId)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.curriculumRepository.UpdateCurriculumUser(curriculumId, userId, params.Role)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx.Status(fiber.StatusNoContent)
+	return nil, nil
+}
+
 func (c *CurriculumController) DeleteCurriculumUser(ctx *fiber.Ctx) (*any, error) {
 	curriculumId, err := httputil.ExtractId(ctx, "curriculum_id")
 	if err != nil {

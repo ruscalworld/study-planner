@@ -10,5 +10,6 @@ type Controller interface {
 	DeleteCurriculumCode(ctx *fiber.Ctx) (*any, error)
 
 	GetCurriculumUsers(ctx *fiber.Ctx) (*[]User, error)
+	UpdateCurriculumUser(ctx *fiber.Ctx, params *UpdateCurriculumUserParams) (*any, error)
 	DeleteCurriculumUser(ctx *fiber.Ctx) (*any, error)
 }

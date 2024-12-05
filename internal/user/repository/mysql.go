@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/ruscalworld/study-planner/internal/access"
 	"github.com/ruscalworld/study-planner/internal/user"
 
 	"github.com/jmoiron/sqlx"
@@ -190,4 +191,23 @@ func (m *MySqlRepository) GetDisciplineStats(userId int64, disciplineId int64) (
 	}
 
 	return &s, nil
+}
+
+func (m *MySqlRepository) GetUserCurriculums(userId int64) (*[]user.Curriculum, error) {
+	c := make([]user.Curriculum, 0)
+	err := m.db.Select(&c, "select c.id, c.name, c.semester, uc.role from user_curriculums uc join curriculums c on c.id = uc.curriculum_id where uc.user_id = ?", userId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, user.ErrNoCurriculumAccess
+		}
+
+		return nil, err
+	}
+
+	return &c, nil
+}
+
+func (m *MySqlRepository) CreateUserCurriculum(userId int64, curriculumId int64, role access.Role) error {
+	_, err := m.db.Exec("insert into user_curriculums (user_id, curriculum_id, role) values (?, ?, ?) on duplicate key update role = ?", userId, curriculumId, role, role)
+	return err
 }

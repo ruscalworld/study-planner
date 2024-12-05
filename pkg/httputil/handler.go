@@ -43,7 +43,9 @@ func handleResponse[O any](ctx *fiber.Ctx, response *O) error {
 	if response != nil {
 		return ctx.JSON(response)
 	} else {
-		ctx.Status(fiber.StatusNoContent)
+		if ctx.Response().StatusCode() == fiber.StatusOK {
+			ctx.Status(fiber.StatusNoContent)
+		}
 	}
 
 	return ctx.Send(nil)

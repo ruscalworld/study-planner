@@ -39,6 +39,10 @@ func Unauthorized(message string) *Error {
 	return &Error{Code: http.StatusUnauthorized, Message: message}
 }
 
+func Forbidden(message string) *Error {
+	return &Error{Code: http.StatusForbidden, Message: message}
+}
+
 func NotFound(message string) *Error {
 	return &Error{Code: http.StatusNotFound, Message: message}
 }

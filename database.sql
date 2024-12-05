@@ -1,9 +1,35 @@
+CREATE TABLE IF NOT EXISTS `institutions`
+(
+    `id`   bigint(20)   NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS `curriculums`
 (
     `id`             bigint(20)   NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `name`           varchar(255) NOT NULL,
     `semester`       int(11)      NOT NULL,
     `institution_id` bigint(20)   NOT NULL REFERENCES `institutions` (`id`)
+);
+
+CREATE TABLE IF NOT EXISTS `curriculum_codes`
+(
+    `id`            bigint(20)                         NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `code`          varchar(50)                        NOT NULL,
+    `role`          enum ('Owner', 'Editor', 'Viewer') NOT NULL DEFAULT 'Viewer',
+    `curriculum_id` bigint(20)                         NOT NULL REFERENCES `curriculums` (`id`),
+    `user_id`       bigint(20)                         NOT NULL REFERENCES `users` (`id`),
+    `expires_at`    timestamp                                   DEFAULT NULL,
+    `created_at`    timestamp                          NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE (`code`)
+);
+
+CREATE TABLE IF NOT EXISTS `disciplines`
+(
+    `id`            bigint(20)   NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `name`          varchar(255) NOT NULL,
+    `curriculum_id` bigint(20)   NOT NULL REFERENCES `curriculums` (`id`)
 );
 
 CREATE TABLE IF NOT EXISTS `discipline_links`
@@ -14,32 +40,11 @@ CREATE TABLE IF NOT EXISTS `discipline_links`
     `url`           varchar(1000) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS `disciplines`
-(
-    `id`            bigint(20)   NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `name`          varchar(255) NOT NULL,
-    `curriculum_id` bigint(20)   NOT NULL REFERENCES `curriculums` (`id`)
-);
-
-CREATE TABLE IF NOT EXISTS `institutions`
-(
-    `id`   bigint(20)   NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `name` varchar(255) NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS `task_groups`
 (
     `id`            bigint(20)   NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `name`          varchar(255) NOT NULL,
     `discipline_id` bigint(20)   NOT NULL REFERENCES `disciplines` (`id`)
-);
-
-CREATE TABLE IF NOT EXISTS `task_links`
-(
-    `id`      bigint(20)    NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `task_id` bigint(20)    NOT NULL REFERENCES `tasks` (`id`),
-    `name`    varchar(255)  NOT NULL,
-    `url`     varchar(1000) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS `tasks`
@@ -54,11 +59,32 @@ CREATE TABLE IF NOT EXISTS `tasks`
     `deadline`      timestamp                          NULL     DEFAULT NULL
 );
 
+CREATE TABLE IF NOT EXISTS `task_links`
+(
+    `id`      bigint(20)    NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `task_id` bigint(20)    NOT NULL REFERENCES `tasks` (`id`),
+    `name`    varchar(255)  NOT NULL,
+    `url`     varchar(1000) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS `users`
+(
+    `id`          bigint(20)   NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `name`        varchar(255) NOT NULL,
+    `avatar_url`  varchar(1000)         DEFAULT NULL,
+    `platform`    varchar(255) NOT NULL,
+    `external_id` varchar(255) NOT NULL,
+    `created_at`  timestamp    NOT NULL DEFAULT current_timestamp(),
+
+    UNIQUE (`platform`, `external_id`)
+);
+
 CREATE TABLE IF NOT EXISTS `user_curriculums`
 (
-    `id`            bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `user_id`       bigint(20) NOT NULL REFERENCES `users` (`id`),
-    `curriculum_id` bigint(20) NOT NULL REFERENCES `curriculums` (`id`),
+    `id`            bigint(20)                         NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `user_id`       bigint(20)                         NOT NULL REFERENCES `users` (`id`),
+    `curriculum_id` bigint(20)                         NOT NULL REFERENCES `curriculums` (`id`),
+    `role`          enum ('Owner', 'Editor', 'Viewer') NOT NULL DEFAULT 'Viewer',
 
     UNIQUE `user_id` (`user_id`, `curriculum_id`)
 );
@@ -84,16 +110,4 @@ CREATE TABLE IF NOT EXISTS `user_task_progress`
     `completed_at` timestamp                                                         NULL     DEFAULT NULL,
 
     UNIQUE `task_id` (`task_id`, `user_id`)
-);
-
-CREATE TABLE IF NOT EXISTS `users`
-(
-    `id`          bigint(20)   NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `name`        varchar(255) NOT NULL,
-    `avatar_url`  varchar(1000)         DEFAULT NULL,
-    `platform`    varchar(255) NOT NULL,
-    `external_id` varchar(255) NOT NULL,
-    `created_at`  timestamp    NOT NULL DEFAULT current_timestamp(),
-    
-    UNIQUE (`platform`, `external_id`)
 );

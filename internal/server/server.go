@@ -63,13 +63,24 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 		r.Route("/profile", func(r fiber.Router) {
 			r.Use(authMiddleware)
 			r.Get("/", httputil.MakeSimpleHandler(s.authController.GetCurrentUser))
+
+			r.Route("/curriculums", func(r fiber.Router) {
+				r.Get("/", httputil.MakeSimpleHandler(s.userController.GetUserCurriculums))
+				r.Post("/", httputil.MakeHandler(s.userController.CreateUserCurriculum))
+			})
 		})
 
 		r.Route("/curriculums", func(r fiber.Router) {
-			r.Get("/", httputil.MakeSimpleHandler(s.curriculumController.GetCurriculums))
+			r.Use(authMiddleware)
 
 			r.Route("/:curriculum_id", func(r fiber.Router) {
 				r.Get("/", httputil.MakeSimpleHandler(s.curriculumController.GetCurriculum))
+
+				r.Route("/codes", func(r fiber.Router) {
+					r.Get("/", httputil.MakeSimpleHandler(s.curriculumController.GetCurriculumCodes))
+					r.Post("/", httputil.MakeHandler(s.curriculumController.CreateCurriculumCode))
+					r.Delete("/:code_id", httputil.MakeSimpleHandler(s.curriculumController.DeleteCurriculumCode))
+				})
 
 				r.Route("/disciplines", func(r fiber.Router) {
 					r.Get("/", httputil.MakeSimpleHandler(s.disciplineController.GetDisciplines))
@@ -79,15 +90,14 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 		})
 
 		r.Route("/disciplines/:discipline_id", func(r fiber.Router) {
+			r.Use(authMiddleware)
 			r.Get("/links", httputil.MakeSimpleHandler(s.disciplineController.GetDisciplineLinks))
 
 			r.Route("/progress", func(r fiber.Router) {
-				r.Use(authMiddleware)
 				r.Get("/", httputil.MakeSimpleHandler(s.disciplineController.GetDisciplineProgress))
 			})
 
 			r.Route("/stats", func(r fiber.Router) {
-				r.Use(authMiddleware)
 				r.Get("/", httputil.MakeSimpleHandler(s.disciplineController.GetDisciplineStats))
 			})
 
@@ -96,7 +106,6 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 				r.Get("/:group_id", httputil.MakeSimpleHandler(s.taskController.GetTaskGroup))
 
 				r.Route("/:group_id/goal", func(r fiber.Router) {
-					r.Use(authMiddleware)
 					r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTaskGroupGoal))
 					r.Put("/", httputil.MakeHandler(s.taskController.UpdateTaskGroupGoal))
 				})
@@ -108,7 +117,6 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 				r.Get("/:task_id/links", httputil.MakeSimpleHandler(s.taskController.GetTaskLinks))
 
 				r.Route("/:task_id/progress", func(r fiber.Router) {
-					r.Use(authMiddleware)
 					r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTaskProgress))
 					r.Put("/", httputil.MakeHandler(s.taskController.UpdateTaskProgress))
 				})
@@ -120,7 +128,11 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 
 			r.Route("/:institution_id", func(r fiber.Router) {
 				r.Get("/", httputil.MakeSimpleHandler(s.institutionController.GetInstitution))
-				r.Get("/curriculums", httputil.MakeSimpleHandler(s.institutionController.GetCurriculums))
+
+				r.Route("/curriculums", func(r fiber.Router) {
+					r.Use(authMiddleware)
+					r.Post("/", httputil.MakeHandler(s.institutionController.CreateCurriculum))
+				})
 			})
 		})
 	})

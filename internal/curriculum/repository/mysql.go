@@ -125,3 +125,19 @@ func (m *MySqlRepository) GetCurriculumPrivileges(curriculumId int64, userId int
 
 	return &cp, nil
 }
+
+func (m *MySqlRepository) GetCurriculumUsers(curriculumId int64) (*[]curriculum.User, error) {
+	cu := make([]curriculum.User, 0)
+
+	err := m.db.Select(&cu, "select u.id as user_id, u.name as name, u.avatar_url as avatar_url, uc.role as role from user_curriculums uc join users u on uc.user_id = u.id where uc.curriculum_id = ?", curriculumId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &cu, nil
+}
+
+func (m *MySqlRepository) DeleteCurriculumUser(curriculumId int64, userId int64) error {
+	_, err := m.db.Exec("delete from user_curriculums where curriculum_id = ? and user_id = ?", curriculumId, userId)
+	return err
+}

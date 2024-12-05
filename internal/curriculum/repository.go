@@ -13,4 +13,6 @@ type Repository interface {
 	GetCurriculumByCode(code string) (*Privileges, error)
 
 	GetCurriculumPrivileges(curriculumId int64, userId int64) (*access.CurriculumPrivileges, error)
+	GetCurriculumUsers(curriculumId int64) (*[]User, error)
+	DeleteCurriculumUser(curriculumId int64, userId int64) error
 }

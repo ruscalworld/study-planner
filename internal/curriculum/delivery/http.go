@@ -109,3 +109,47 @@ func (c *CurriculumController) DeleteCurriculumCode(ctx *fiber.Ctx) (*any, error
 	ctx.Status(fiber.StatusNoContent)
 	return nil, nil
 }
+
+func (c *CurriculumController) GetCurriculumUsers(ctx *fiber.Ctx) (*[]curriculum.User, error) {
+	id, err := httputil.ExtractId(ctx, "curriculum_id")
+	if err != nil {
+		return nil, err
+	}
+
+	err = auth.Authorize(ctx, c.curriculumRepository.GetCurriculumPrivileges, auth.LevelSecure, auth.ActionRead, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.curriculumRepository.GetCurriculumUsers(id)
+}
+
+func (c *CurriculumController) DeleteCurriculumUser(ctx *fiber.Ctx) (*any, error) {
+	curriculumId, err := httputil.ExtractId(ctx, "curriculum_id")
+	if err != nil {
+		return nil, err
+	}
+
+	userId, err := httputil.ExtractId(ctx, "user_id")
+	if err != nil {
+		return nil, err
+	}
+
+	currentUserId := ctx.Locals("userid").(int64)
+	if currentUserId == userId {
+		return nil, stderrors.Conflict("you cannot delete yourself from curriculum user list")
+	}
+
+	err = auth.Authorize(ctx, c.curriculumRepository.GetCurriculumPrivileges, auth.LevelSecure, auth.ActionUpdate, curriculumId)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.curriculumRepository.DeleteCurriculumUser(curriculumId, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx.Status(fiber.StatusNoContent)
+	return nil, nil
+}

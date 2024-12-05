@@ -47,6 +47,10 @@ func NotFound(message string) *Error {
 	return &Error{Code: http.StatusNotFound, Message: message}
 }
 
+func Conflict(message string) *Error {
+	return &Error{Code: http.StatusConflict, Message: message}
+}
+
 func UnprocessableEntity(message string) *Error {
 	return &Error{Code: http.StatusUnprocessableEntity, Message: message}
 }

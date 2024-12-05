@@ -36,3 +36,10 @@ type Privileges struct {
 	Curriculum
 	access.CurriculumPrivileges
 }
+
+type User struct {
+	UserId    int64       `json:"userId" db:"user_id"`
+	Name      string      `json:"name" db:"name"`
+	AvatarUrl string      `json:"avatarUrl" db:"avatar_url"`
+	Role      access.Role `json:"role" db:"role"`
+}

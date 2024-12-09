@@ -73,6 +73,7 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 
 		r.Route("/curriculums", func(r fiber.Router) {
 			r.Use(authMiddleware)
+			r.Post("/", httputil.MakeHandler(s.curriculumController.CreateCurriculum))
 
 			r.Route("/:curriculum_id", func(r fiber.Router) {
 				r.Get("/", httputil.MakeSimpleHandler(s.curriculumController.GetCurriculum))

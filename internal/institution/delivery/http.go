@@ -6,10 +6,9 @@ import (
 	"github.com/ruscalworld/study-planner/internal/institution"
 	"github.com/ruscalworld/study-planner/internal/user"
 
-	"github.com/ruscalworld/study-planner/pkg/httputil"
-	"github.com/ruscalworld/study-planner/pkg/stderrors"
-
 	"github.com/gofiber/fiber/v2"
+
+	"github.com/ruscalworld/study-planner/pkg/httputil"
 )
 
 type InstitutionController struct {
@@ -49,8 +48,9 @@ func (c *InstitutionController) CreateCurriculum(ctx *fiber.Ctx, request *instit
 		return nil, err
 	}
 
-	if len([]rune(request.Name)) == 0 {
-		return nil, stderrors.UnprocessableEntity("name must not be empty")
+	err = request.Validate()
+	if err != nil {
+		return nil, err
 	}
 
 	cu := &curriculum.Curriculum{

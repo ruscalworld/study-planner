@@ -43,3 +43,24 @@ type User struct {
 	AvatarUrl string      `json:"avatarUrl" db:"avatar_url"`
 	Role      access.Role `json:"role" db:"role"`
 }
+
+type CreateCurriculumParams struct {
+	Name     string `json:"name"`
+	Semester int    `json:"semester"`
+}
+
+func (p *CreateCurriculumParams) Validate() error {
+	if p.Name == "" {
+		return stderrors.UnprocessableEntity("name must not be empty")
+	}
+
+	if p.Semester < 0 {
+		return stderrors.UnprocessableEntity("semester must not be negative")
+	}
+
+	if p.Semester > 32 {
+		return stderrors.UnprocessableEntity("semester must not be greater than 32")
+	}
+
+	return nil
+}

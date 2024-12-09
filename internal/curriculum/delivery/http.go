@@ -3,8 +3,10 @@ package delivery
 import (
 	"time"
 
+	"github.com/ruscalworld/study-planner/internal/access"
 	"github.com/ruscalworld/study-planner/internal/auth"
 	"github.com/ruscalworld/study-planner/internal/curriculum"
+	"github.com/ruscalworld/study-planner/internal/user"
 
 	"github.com/ruscalworld/study-planner/pkg/code"
 	"github.com/ruscalworld/study-planner/pkg/httputil"
@@ -15,10 +17,11 @@ import (
 
 type CurriculumController struct {
 	curriculumRepository curriculum.Repository
+	userRepository       user.Repository
 }
 
-func NewCurriculumController(curriculumRepository curriculum.Repository) *CurriculumController {
-	return &CurriculumController{curriculumRepository: curriculumRepository}
+func NewCurriculumController(curriculumRepository curriculum.Repository, userRepository user.Repository) *CurriculumController {
+	return &CurriculumController{curriculumRepository: curriculumRepository, userRepository: userRepository}
 }
 
 func (c *CurriculumController) GetCurriculum(ctx *fiber.Ctx) (*curriculum.Curriculum, error) {
@@ -152,4 +155,29 @@ func (c *CurriculumController) DeleteCurriculumUser(ctx *fiber.Ctx) (*any, error
 
 	ctx.Status(fiber.StatusNoContent)
 	return nil, nil
+}
+
+func (c *CurriculumController) CreateCurriculum(ctx *fiber.Ctx, request *curriculum.CreateCurriculumParams) (*curriculum.Curriculum, error) {
+	err := request.Validate()
+	if err != nil {
+		return nil, err
+	}
+
+	cu := &curriculum.Curriculum{
+		Name:     request.Name,
+		Semester: request.Semester,
+	}
+
+	err = c.curriculumRepository.CreateCurriculum(-1, cu)
+	if err != nil {
+		return nil, err
+	}
+
+	userId := ctx.Locals("userid").(int64)
+	err = c.userRepository.CreateUserCurriculum(userId, cu.ID, access.RoleOwner)
+	if err != nil {
+		return nil, err
+	}
+
+	return cu, nil
 }

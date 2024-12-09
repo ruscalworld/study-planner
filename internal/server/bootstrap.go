@@ -150,7 +150,7 @@ func RunApp(ctx *cli.Context) error {
 
 	log.Println("initializing controllers")
 	s := &Server[platform.AuthenticationConfig, platform.CodeRequest]{
-		curriculumController:  curriculumDelivery.NewCurriculumController(curriculumRepo),
+		curriculumController:  curriculumDelivery.NewCurriculumController(curriculumRepo, userRepo),
 		disciplineController:  disciplineDelivery.NewDisciplineController(curriculumRepo, disciplineRepo, userRepo),
 		institutionController: institutionDelivery.NewInstitutionController(institutionRepo, curriculumRepo, userRepo),
 		taskController:        taskDelivery.NewTaskController(disciplineRepo, taskRepo, userRepo),

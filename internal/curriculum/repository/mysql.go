@@ -34,10 +34,22 @@ func (m *MySqlRepository) GetCurriculum(id int64) (*curriculum.Curriculum, error
 }
 
 func (m *MySqlRepository) CreateCurriculum(institutionId int64, c *curriculum.Curriculum) error {
-	result, err := m.db.Exec(
-		"insert into curriculums (name, semester, institution_id) values (?, ?, ?)",
-		c.Name, c.Semester, institutionId,
+	var (
+		result sql.Result
+		err    error
 	)
+
+	if institutionId < 0 {
+		result, err = m.db.Exec(
+			"insert into curriculums (name, semester) values (?, ?)",
+			c.Name, c.Semester,
+		)
+	} else {
+		result, err = m.db.Exec(
+			"insert into curriculums (name, semester, institution_id) values (?, ?, ?)",
+			c.Name, c.Semester, institutionId,
+		)
+	}
 
 	if err != nil {
 		return err

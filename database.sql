@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS `curriculums`
     `id`             bigint(20)   NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `name`           varchar(255) NOT NULL,
     `semester`       int(11)      NOT NULL,
-    `institution_id` bigint(20)   NOT NULL REFERENCES `institutions` (`id`)
+    `institution_id` bigint(20) REFERENCES `institutions` (`id`)
 );
 
 CREATE TABLE IF NOT EXISTS `curriculum_codes`

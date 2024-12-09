@@ -44,12 +44,12 @@ type User struct {
 	Role      access.Role `json:"role" db:"role"`
 }
 
-type CreateCurriculumParams struct {
+type Params struct {
 	Name     string `json:"name"`
 	Semester int    `json:"semester"`
 }
 
-func (p *CreateCurriculumParams) Validate() error {
+func (p *Params) Validate() error {
 	if p.Name == "" {
 		return stderrors.UnprocessableEntity("name must not be empty")
 	}

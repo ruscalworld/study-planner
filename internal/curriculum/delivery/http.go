@@ -38,6 +38,55 @@ func (c *CurriculumController) GetCurriculum(ctx *fiber.Ctx) (*curriculum.Curric
 	return c.curriculumRepository.GetCurriculum(id)
 }
 
+func (c *CurriculumController) UpdateCurriculum(ctx *fiber.Ctx, params *curriculum.Params) (*curriculum.Curriculum, error) {
+	id, err := httputil.ExtractId(ctx, "curriculum_id")
+	if err != nil {
+		return nil, err
+	}
+
+	err = auth.Authorize(ctx, c.curriculumRepository.GetCurriculumPrivileges, auth.LevelSecure, auth.ActionUpdate, id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = params.Validate()
+	if err != nil {
+		return nil, err
+	}
+
+	cu := &curriculum.Curriculum{
+		ID:       id,
+		Name:     params.Name,
+		Semester: params.Semester,
+	}
+
+	err = c.curriculumRepository.UpdateCurriculum(cu)
+	if err != nil {
+		return nil, err
+	}
+
+	return cu, nil
+}
+
+func (c *CurriculumController) DeleteCurriculum(ctx *fiber.Ctx) (*curriculum.Curriculum, error) {
+	id, err := httputil.ExtractId(ctx, "curriculum_id")
+	if err != nil {
+		return nil, err
+	}
+
+	err = auth.Authorize(ctx, c.curriculumRepository.GetCurriculumPrivileges, auth.LevelSecure, auth.ActionDelete, id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.curriculumRepository.DeleteCurriculum(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
 func (c *CurriculumController) GetCurriculumCodes(ctx *fiber.Ctx) (*[]curriculum.Code, error) {
 	id, err := httputil.ExtractId(ctx, "curriculum_id")
 	if err != nil {
@@ -99,7 +148,7 @@ func (c *CurriculumController) DeleteCurriculumCode(ctx *fiber.Ctx) (*any, error
 		return nil, err
 	}
 
-	err = auth.Authorize(ctx, c.curriculumRepository.GetCurriculumPrivileges, auth.LevelSecure, auth.ActionCreate, curriculumId)
+	err = auth.Authorize(ctx, c.curriculumRepository.GetCurriculumPrivileges, auth.LevelSecure, auth.ActionUpdate, curriculumId)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +206,7 @@ func (c *CurriculumController) DeleteCurriculumUser(ctx *fiber.Ctx) (*any, error
 	return nil, nil
 }
 
-func (c *CurriculumController) CreateCurriculum(ctx *fiber.Ctx, request *curriculum.CreateCurriculumParams) (*curriculum.Curriculum, error) {
+func (c *CurriculumController) CreateCurriculum(ctx *fiber.Ctx, request *curriculum.Params) (*curriculum.Curriculum, error) {
 	err := request.Validate()
 	if err != nil {
 		return nil, err

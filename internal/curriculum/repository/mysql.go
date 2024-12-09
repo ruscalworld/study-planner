@@ -64,6 +64,16 @@ func (m *MySqlRepository) CreateCurriculum(institutionId int64, c *curriculum.Cu
 	return nil
 }
 
+func (m *MySqlRepository) UpdateCurriculum(c *curriculum.Curriculum) error {
+	_, err := m.db.Exec("update curriculums set name = ?, semester = ? where id = ?", c.Name, c.Semester, c.ID)
+	return err
+}
+
+func (m *MySqlRepository) DeleteCurriculum(id int64) error {
+	_, err := m.db.Exec("delete from curriculums where id = ?", id)
+	return err
+}
+
 func (m *MySqlRepository) GetInstitutionCurriculums(institutionId int64) (*[]curriculum.Curriculum, error) {
 	c := make([]curriculum.Curriculum, 0)
 	err := m.db.Select(&c, "select id, name, semester from curriculums where institution_id = ?", institutionId)
@@ -125,7 +135,7 @@ func (m *MySqlRepository) GetCurriculumByCode(code string) (*curriculum.Privileg
 
 func (m *MySqlRepository) GetCurriculumPrivileges(curriculumId int64, userId int64) (*access.CurriculumPrivileges, error) {
 	var cp access.CurriculumPrivileges
-	err := m.db.Get(&cp, "select c.id as curriculum_id, uc.role as role from curriculums c join user_curriculums uc where c.id = ? and uc.user_id = ?", curriculumId, userId)
+	err := m.db.Get(&cp, "select c.id as curriculum_id, uc.role as role from curriculums c join user_curriculums uc on c.id = uc.curriculum_id where c.id = ? and uc.user_id = ?", curriculumId, userId)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

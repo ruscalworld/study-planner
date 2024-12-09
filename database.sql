@@ -1,3 +1,15 @@
+CREATE TABLE IF NOT EXISTS `users`
+(
+    `id`          bigint(20)   NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `name`        varchar(255) NOT NULL,
+    `avatar_url`  varchar(1000)         DEFAULT NULL,
+    `platform`    varchar(255) NOT NULL,
+    `external_id` varchar(255) NOT NULL,
+    `created_at`  timestamp    NOT NULL DEFAULT current_timestamp(),
+
+    UNIQUE (`platform`, `external_id`)
+);
+
 CREATE TABLE IF NOT EXISTS `institutions`
 (
     `id`   bigint(20)   NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -17,8 +29,8 @@ CREATE TABLE IF NOT EXISTS `curriculum_codes`
     `id`            bigint(20)                         NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `code`          varchar(50)                        NOT NULL,
     `role`          enum ('Owner', 'Editor', 'Viewer') NOT NULL DEFAULT 'Viewer',
-    `curriculum_id` bigint(20)                         NOT NULL REFERENCES `curriculums` (`id`),
-    `user_id`       bigint(20)                         NOT NULL REFERENCES `users` (`id`),
+    `curriculum_id` bigint(20)                         NOT NULL REFERENCES `curriculums` (`id`) ON DELETE CASCADE,
+    `user_id`       bigint(20)                         REFERENCES `users` (`id`) ON DELETE SET NULL,
     `expires_at`    timestamp                                   DEFAULT NULL,
     `created_at`    timestamp                          NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -29,13 +41,13 @@ CREATE TABLE IF NOT EXISTS `disciplines`
 (
     `id`            bigint(20)   NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `name`          varchar(255) NOT NULL,
-    `curriculum_id` bigint(20)   NOT NULL REFERENCES `curriculums` (`id`)
+    `curriculum_id` bigint(20)   NOT NULL REFERENCES `curriculums` (`id`) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS `discipline_links`
 (
     `id`            bigint(20)    NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `discipline_id` bigint(20)    NOT NULL REFERENCES `disciplines` (`id`),
+    `discipline_id` bigint(20)    NOT NULL REFERENCES `disciplines` (`id`) ON DELETE CASCADE,
     `name`          varchar(255)  NOT NULL,
     `url`           varchar(1000) NOT NULL
 );
@@ -44,7 +56,7 @@ CREATE TABLE IF NOT EXISTS `task_groups`
 (
     `id`            bigint(20)   NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `name`          varchar(255) NOT NULL,
-    `discipline_id` bigint(20)   NOT NULL REFERENCES `disciplines` (`id`)
+    `discipline_id` bigint(20)   NOT NULL REFERENCES `disciplines` (`id`) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS `tasks`
@@ -53,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `tasks`
     `name`          varchar(255)                       NOT NULL,
     `external_name` varchar(255)                                DEFAULT NULL,
     `description`   text                                        DEFAULT NULL,
-    `task_group_id` bigint(20)                         NOT NULL REFERENCES `task_groups` (`id`),
+    `task_group_id` bigint(20)                         NOT NULL REFERENCES `task_groups` (`id`) ON DELETE CASCADE,
     `status`        enum ('NotPublished', 'Available') NOT NULL DEFAULT 'NotPublished',
     `difficulty`    int(10) unsigned                   NOT NULL DEFAULT 1,
     `deadline`      timestamp                          NULL     DEFAULT NULL
@@ -62,28 +74,16 @@ CREATE TABLE IF NOT EXISTS `tasks`
 CREATE TABLE IF NOT EXISTS `task_links`
 (
     `id`      bigint(20)    NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `task_id` bigint(20)    NOT NULL REFERENCES `tasks` (`id`),
+    `task_id` bigint(20)    NOT NULL REFERENCES `tasks` (`id`) ON DELETE CASCADE,
     `name`    varchar(255)  NOT NULL,
     `url`     varchar(1000) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS `users`
-(
-    `id`          bigint(20)   NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `name`        varchar(255) NOT NULL,
-    `avatar_url`  varchar(1000)         DEFAULT NULL,
-    `platform`    varchar(255) NOT NULL,
-    `external_id` varchar(255) NOT NULL,
-    `created_at`  timestamp    NOT NULL DEFAULT current_timestamp(),
-
-    UNIQUE (`platform`, `external_id`)
 );
 
 CREATE TABLE IF NOT EXISTS `user_curriculums`
 (
     `id`            bigint(20)                         NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `user_id`       bigint(20)                         NOT NULL REFERENCES `users` (`id`),
-    `curriculum_id` bigint(20)                         NOT NULL REFERENCES `curriculums` (`id`),
+    `user_id`       bigint(20)                         NOT NULL REFERENCES `users` (`id`) ON DELETE CASCADE,
+    `curriculum_id` bigint(20)                         NOT NULL REFERENCES `curriculums` (`id`) ON DELETE CASCADE,
     `role`          enum ('Owner', 'Editor', 'Viewer') NOT NULL DEFAULT 'Viewer',
 
     UNIQUE `user_id` (`user_id`, `curriculum_id`)
@@ -92,8 +92,8 @@ CREATE TABLE IF NOT EXISTS `user_curriculums`
 CREATE TABLE IF NOT EXISTS `user_goals`
 (
     `id`            bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `user_id`       bigint(20) NOT NULL REFERENCES `users` (`id`),
-    `task_group_id` bigint(20) NOT NULL REFERENCES `task_groups` (`id`),
+    `user_id`       bigint(20) NOT NULL REFERENCES `users` (`id`) ON DELETE CASCADE,
+    `task_group_id` bigint(20) NOT NULL REFERENCES `task_groups` (`id`) ON DELETE CASCADE,
     `min_completed` int(11)    NOT NULL,
 
     UNIQUE `user_id` (`user_id`, `task_group_id`)
@@ -102,8 +102,8 @@ CREATE TABLE IF NOT EXISTS `user_goals`
 CREATE TABLE IF NOT EXISTS `user_task_progress`
 (
     `id`           bigint(20)                                                        NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `user_id`      bigint(20)                                                        NOT NULL REFERENCES `users` (`id`),
-    `task_id`      bigint(20)                                                        NOT NULL REFERENCES `tasks` (`id`),
+    `user_id`      bigint(20)                                                        NOT NULL REFERENCES `users` (`id`) ON DELETE CASCADE,
+    `task_id`      bigint(20)                                                        NOT NULL REFERENCES `tasks` (`id`) ON DELETE CASCADE,
     `status`       enum ('NotStarted', 'InProgress', 'NeedsProtection', 'Completed') NOT NULL DEFAULT 'NotStarted',
     `grade`        enum ('Excellent', 'Good', 'Satisfactory', 'Credited')                     DEFAULT NULL,
     `started_at`   timestamp                                                         NULL     DEFAULT NULL,

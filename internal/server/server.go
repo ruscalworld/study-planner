@@ -77,6 +77,8 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 
 			r.Route("/:curriculum_id", func(r fiber.Router) {
 				r.Get("/", httputil.MakeSimpleHandler(s.curriculumController.GetCurriculum))
+				r.Put("/", httputil.MakeHandler(s.curriculumController.UpdateCurriculum))
+				r.Delete("/", httputil.MakeSimpleHandler(s.curriculumController.DeleteCurriculum))
 
 				r.Route("/codes", func(r fiber.Router) {
 					r.Get("/", httputil.MakeSimpleHandler(s.curriculumController.GetCurriculumCodes))

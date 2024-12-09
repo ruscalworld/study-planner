@@ -4,10 +4,12 @@ import "github.com/gofiber/fiber/v2"
 
 type Controller interface {
 	GetCurriculum(ctx *fiber.Ctx) (*Curriculum, error)
-	CreateCurriculum(ctx *fiber.Ctx, request *CreateCurriculumParams) (*Curriculum, error)
+	CreateCurriculum(ctx *fiber.Ctx, params *Params) (*Curriculum, error)
+	UpdateCurriculum(ctx *fiber.Ctx, params *Params) (*Curriculum, error)
+	DeleteCurriculum(ctx *fiber.Ctx) (*Curriculum, error)
 
 	GetCurriculumCodes(ctx *fiber.Ctx) (*[]Code, error)
-	CreateCurriculumCode(ctx *fiber.Ctx, request *CreateCodeParams) (*Code, error)
+	CreateCurriculumCode(ctx *fiber.Ctx, params *CreateCodeParams) (*Code, error)
 	DeleteCurriculumCode(ctx *fiber.Ctx) (*any, error)
 
 	GetCurriculumUsers(ctx *fiber.Ctx) (*[]User, error)

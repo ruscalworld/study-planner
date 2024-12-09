@@ -85,7 +85,11 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 
 				r.Route("/disciplines", func(r fiber.Router) {
 					r.Get("/", httputil.MakeSimpleHandler(s.disciplineController.GetDisciplines))
-					r.Get("/:discipline_id", httputil.MakeSimpleHandler(s.disciplineController.GetDiscipline))
+					r.Post("/", httputil.MakeHandler(s.disciplineController.CreateDiscipline))
+
+					r.Get("/:discipline_id", httputil.MakeSimpleHandler(s.disciplineController.GetCurriculumDiscipline))
+					r.Put("/:discipline_id", httputil.MakeHandler(s.disciplineController.UpdateDiscipline))
+					r.Delete("/:discipline_id", httputil.MakeSimpleHandler(s.disciplineController.DeleteDiscipline))
 				})
 
 				r.Route("/users", func(r fiber.Router) {
@@ -97,7 +101,13 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 
 		r.Route("/disciplines/:discipline_id", func(r fiber.Router) {
 			r.Use(authMiddleware)
-			r.Get("/links", httputil.MakeSimpleHandler(s.disciplineController.GetDisciplineLinks))
+
+			r.Route("/links", func(r fiber.Router) {
+				r.Get("/", httputil.MakeSimpleHandler(s.disciplineController.GetDisciplineLinks))
+				r.Post("/", httputil.MakeHandler(s.disciplineController.CreateDisciplineLink))
+				r.Put("/:discipline_link_id", httputil.MakeHandler(s.disciplineController.UpdateDisciplineLink))
+				r.Delete("/:discipline_link_id", httputil.MakeSimpleHandler(s.disciplineController.DeleteDisciplineLink))
+			})
 
 			r.Route("/progress", func(r fiber.Router) {
 				r.Get("/", httputil.MakeSimpleHandler(s.disciplineController.GetDisciplineProgress))

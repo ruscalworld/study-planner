@@ -1,8 +1,6 @@
 package delivery
 
 import (
-	"regexp"
-
 	"github.com/ruscalworld/study-planner/internal/access"
 	"github.com/ruscalworld/study-planner/internal/curriculum"
 	"github.com/ruscalworld/study-planner/internal/institution"
@@ -60,13 +58,8 @@ func (c *InstitutionController) CreateCurriculum(ctx *fiber.Ctx, request *instit
 		return nil, err
 	}
 
-	nameValid, err := regexp.MatchString("^[a-zA-Zа-яА-Яё0-9.-]{3,}$", request.Name)
-	if err != nil {
-		return nil, err
-	}
-
-	if !nameValid {
-		return nil, stderrors.BadRequest("name is not valid")
+	if len([]rune(request.Name)) == 0 {
+		return nil, stderrors.UnprocessableEntity("name must not be empty")
 	}
 
 	cu := &curriculum.Curriculum{

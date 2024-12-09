@@ -43,15 +43,6 @@ func (c *InstitutionController) GetInstitution(ctx *fiber.Ctx) (*institution.Ins
 	return c.institutionRepository.GetInstitution(id)
 }
 
-func (c *InstitutionController) GetCurriculums(ctx *fiber.Ctx) (*[]curriculum.Curriculum, error) {
-	id, err := httputil.ExtractId(ctx, "institution_id")
-	if err != nil {
-		return nil, err
-	}
-
-	return c.curriculumRepository.GetInstitutionCurriculums(id)
-}
-
 func (c *InstitutionController) CreateCurriculum(ctx *fiber.Ctx, request *institution.CreateCurriculumParams) (*curriculum.Curriculum, error) {
 	institutionId, err := httputil.ExtractId(ctx, "institution_id")
 	if err != nil {

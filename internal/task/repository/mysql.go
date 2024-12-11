@@ -43,6 +43,44 @@ func (m *MySqlRepository) GetGroup(disciplineId int64, groupId int64) (*task.Gro
 	return &g, nil
 }
 
+func (m *MySqlRepository) CreateGroup(disciplineId int64, group *task.Group) error {
+	result, err := m.db.Exec("insert into task_groups (name, discipline_id) values (?, ?)", group.Name, disciplineId)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	group.ID = id
+	return nil
+}
+
+func (m *MySqlRepository) UpdateGroup(group *task.Group) error {
+	_, err := m.db.Exec("update task_groups set name = ? where id = ?", group.Name, group.ID)
+	return err
+}
+
+func (m *MySqlRepository) DeleteGroup(taskGroupId int64) error {
+	result, err := m.db.Exec("delete from task_groups where id = ?", taskGroupId)
+	if err != nil {
+		return err
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return task.ErrUnknownGroup
+	}
+
+	return nil
+}
+
 func (m *MySqlRepository) GetTasks(disciplineId int64) (*[]task.Task, error) {
 	t := make([]task.Task, 0)
 	err := m.db.Select(&t, "select t.id, t.name, t.external_name, t.description, t.task_group_id, t.status, t.difficulty, t.deadline from tasks t join task_groups g on t.task_group_id = g.id where g.discipline_id = ?", disciplineId)
@@ -67,6 +105,52 @@ func (m *MySqlRepository) GetTask(disciplineId int64, taskId int64) (*task.Task,
 	return &t, nil
 }
 
+func (m *MySqlRepository) CreateTask(taskGroupId int64, t *task.Task) error {
+	result, err := m.db.Exec(
+		"insert into tasks (name, external_name, description, task_group_id) values (?, ?, ?, ?)",
+		t.Name, t.ExternalName, t.Description, taskGroupId,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	t.ID = id
+	return nil
+}
+
+func (m *MySqlRepository) UpdateTask(t *task.Task) error {
+	_, err := m.db.Exec(
+		"update tasks set name = ?, external_name = ?, description = ?, deadline = ?, difficulty = ? where id = ?",
+		t.Name, t.ExternalName, t.Description, t.Deadline, t.Difficulty, t.ID,
+	)
+
+	return err
+}
+
+func (m *MySqlRepository) DeleteTask(taskId int64) error {
+	result, err := m.db.Exec("delete from tasks where id = ?", taskId)
+	if err != nil {
+		return err
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return task.ErrUnknownTask
+	}
+
+	return nil
+}
+
 func (m *MySqlRepository) GetTaskLinks(disciplineId int64, taskId int64) (*[]task.Link, error) {
 	l := make([]task.Link, 0)
 	err := m.db.Select(&l, "select l.id, l.name, l.url from task_links l join tasks t on l.task_id = t.id join task_groups g on t.task_group_id = g.id where g.discipline_id = ? and t.id = ?", disciplineId, taskId)
@@ -75,6 +159,44 @@ func (m *MySqlRepository) GetTaskLinks(disciplineId int64, taskId int64) (*[]tas
 	}
 
 	return &l, nil
+}
+
+func (m *MySqlRepository) CreateTaskLink(taskId int64, link *task.Link) error {
+	result, err := m.db.Exec("insert into task_links (task_id, name, url) values (?, ?, ?)", taskId, link.Name, link.URL)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	link.ID = id
+	return nil
+}
+
+func (m *MySqlRepository) UpdateTaskLink(link *task.Link) error {
+	_, err := m.db.Exec("update task_links set name = ?, url = ? where id = ?", link.Name, link.URL, link.ID)
+	return err
+}
+
+func (m *MySqlRepository) DeleteTaskLink(taskLinkId int64) error {
+	result, err := m.db.Exec("delete from task_links where id = ?", taskLinkId)
+	if err != nil {
+		return err
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return task.ErrUnknownTaskLink
+	}
+
+	return nil
 }
 
 func (m *MySqlRepository) GetCurriculumPrivileges(taskGroupId int64, userId int64) (*access.CurriculumPrivileges, error) {

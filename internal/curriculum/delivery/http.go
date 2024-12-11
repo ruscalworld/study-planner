@@ -3,8 +3,10 @@ package delivery
 import (
 	"time"
 
+	"github.com/ruscalworld/study-planner/internal/access"
 	"github.com/ruscalworld/study-planner/internal/auth"
 	"github.com/ruscalworld/study-planner/internal/curriculum"
+	"github.com/ruscalworld/study-planner/internal/user"
 
 	"github.com/ruscalworld/study-planner/pkg/code"
 	"github.com/ruscalworld/study-planner/pkg/httputil"
@@ -15,10 +17,11 @@ import (
 
 type CurriculumController struct {
 	curriculumRepository curriculum.Repository
+	userRepository       user.Repository
 }
 
-func NewCurriculumController(curriculumRepository curriculum.Repository) *CurriculumController {
-	return &CurriculumController{curriculumRepository: curriculumRepository}
+func NewCurriculumController(curriculumRepository curriculum.Repository, userRepository user.Repository) *CurriculumController {
+	return &CurriculumController{curriculumRepository: curriculumRepository, userRepository: userRepository}
 }
 
 func (c *CurriculumController) GetCurriculum(ctx *fiber.Ctx) (*curriculum.Curriculum, error) {
@@ -33,6 +36,55 @@ func (c *CurriculumController) GetCurriculum(ctx *fiber.Ctx) (*curriculum.Curric
 	}
 
 	return c.curriculumRepository.GetCurriculum(id)
+}
+
+func (c *CurriculumController) UpdateCurriculum(ctx *fiber.Ctx, params *curriculum.Params) (*curriculum.Curriculum, error) {
+	id, err := httputil.ExtractId(ctx, "curriculum_id")
+	if err != nil {
+		return nil, err
+	}
+
+	err = auth.Authorize(ctx, c.curriculumRepository.GetCurriculumPrivileges, auth.LevelSecure, auth.ActionUpdate, id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = params.Validate()
+	if err != nil {
+		return nil, err
+	}
+
+	cu := &curriculum.Curriculum{
+		ID:       id,
+		Name:     params.Name,
+		Semester: params.Semester,
+	}
+
+	err = c.curriculumRepository.UpdateCurriculum(cu)
+	if err != nil {
+		return nil, err
+	}
+
+	return cu, nil
+}
+
+func (c *CurriculumController) DeleteCurriculum(ctx *fiber.Ctx) (*curriculum.Curriculum, error) {
+	id, err := httputil.ExtractId(ctx, "curriculum_id")
+	if err != nil {
+		return nil, err
+	}
+
+	err = auth.Authorize(ctx, c.curriculumRepository.GetCurriculumPrivileges, auth.LevelSecure, auth.ActionDelete, id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.curriculumRepository.DeleteCurriculum(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }
 
 func (c *CurriculumController) GetCurriculumCodes(ctx *fiber.Ctx) (*[]curriculum.Code, error) {
@@ -96,7 +148,7 @@ func (c *CurriculumController) DeleteCurriculumCode(ctx *fiber.Ctx) (*any, error
 		return nil, err
 	}
 
-	err = auth.Authorize(ctx, c.curriculumRepository.GetCurriculumPrivileges, auth.LevelSecure, auth.ActionCreate, curriculumId)
+	err = auth.Authorize(ctx, c.curriculumRepository.GetCurriculumPrivileges, auth.LevelSecure, auth.ActionUpdate, curriculumId)
 	if err != nil {
 		return nil, err
 	}
@@ -186,4 +238,29 @@ func (c *CurriculumController) DeleteCurriculumUser(ctx *fiber.Ctx) (*any, error
 
 	ctx.Status(fiber.StatusNoContent)
 	return nil, nil
+}
+
+func (c *CurriculumController) CreateCurriculum(ctx *fiber.Ctx, request *curriculum.Params) (*curriculum.Curriculum, error) {
+	err := request.Validate()
+	if err != nil {
+		return nil, err
+	}
+
+	cu := &curriculum.Curriculum{
+		Name:     request.Name,
+		Semester: request.Semester,
+	}
+
+	err = c.curriculumRepository.CreateCurriculum(-1, cu)
+	if err != nil {
+		return nil, err
+	}
+
+	userId := ctx.Locals("userid").(int64)
+	err = c.userRepository.CreateUserCurriculum(userId, cu.ID, access.RoleOwner)
+	if err != nil {
+		return nil, err
+	}
+
+	return cu, nil
 }

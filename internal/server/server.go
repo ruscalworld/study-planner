@@ -73,9 +73,12 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 
 		r.Route("/curriculums", func(r fiber.Router) {
 			r.Use(authMiddleware)
+			r.Post("/", httputil.MakeHandler(s.curriculumController.CreateCurriculum))
 
 			r.Route("/:curriculum_id", func(r fiber.Router) {
 				r.Get("/", httputil.MakeSimpleHandler(s.curriculumController.GetCurriculum))
+				r.Put("/", httputil.MakeHandler(s.curriculumController.UpdateCurriculum))
+				r.Delete("/", httputil.MakeSimpleHandler(s.curriculumController.DeleteCurriculum))
 
 				r.Route("/codes", func(r fiber.Router) {
 					r.Get("/", httputil.MakeSimpleHandler(s.curriculumController.GetCurriculumCodes))
@@ -85,7 +88,11 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 
 				r.Route("/disciplines", func(r fiber.Router) {
 					r.Get("/", httputil.MakeSimpleHandler(s.disciplineController.GetDisciplines))
-					r.Get("/:discipline_id", httputil.MakeSimpleHandler(s.disciplineController.GetDiscipline))
+					r.Post("/", httputil.MakeHandler(s.disciplineController.CreateDiscipline))
+
+					r.Get("/:discipline_id", httputil.MakeSimpleHandler(s.disciplineController.GetCurriculumDiscipline))
+					r.Put("/:discipline_id", httputil.MakeHandler(s.disciplineController.UpdateDiscipline))
+					r.Delete("/:discipline_id", httputil.MakeSimpleHandler(s.disciplineController.DeleteDiscipline))
 				})
 
 				r.Route("/users", func(r fiber.Router) {
@@ -98,7 +105,13 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 
 		r.Route("/disciplines/:discipline_id", func(r fiber.Router) {
 			r.Use(authMiddleware)
-			r.Get("/links", httputil.MakeSimpleHandler(s.disciplineController.GetDisciplineLinks))
+
+			r.Route("/links", func(r fiber.Router) {
+				r.Get("/", httputil.MakeSimpleHandler(s.disciplineController.GetDisciplineLinks))
+				r.Post("/", httputil.MakeHandler(s.disciplineController.CreateDisciplineLink))
+				r.Put("/:discipline_link_id", httputil.MakeHandler(s.disciplineController.UpdateDisciplineLink))
+				r.Delete("/:discipline_link_id", httputil.MakeSimpleHandler(s.disciplineController.DeleteDisciplineLink))
+			})
 
 			r.Route("/progress", func(r fiber.Router) {
 				r.Get("/", httputil.MakeSimpleHandler(s.disciplineController.GetDisciplineProgress))
@@ -110,22 +123,70 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 
 			r.Route("/groups", func(r fiber.Router) {
 				r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTaskGroups))
-				r.Get("/:group_id", httputil.MakeSimpleHandler(s.taskController.GetTaskGroup))
+				r.Post("/", httputil.MakeHandler(s.taskController.CreateTaskGroup))
 
-				r.Route("/:group_id/goal", func(r fiber.Router) {
-					r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTaskGroupGoal))
-					r.Put("/", httputil.MakeHandler(s.taskController.UpdateTaskGroupGoal))
+				r.Route("/:group_id", func(r fiber.Router) {
+					r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTaskGroup))
+					r.Put("/", httputil.MakeHandler(s.taskController.UpdateTaskGroup))
+					r.Delete("/", httputil.MakeSimpleHandler(s.taskController.DeleteTaskGroup))
+
+					r.Route("/goal", func(r fiber.Router) {
+						r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTaskGroupGoal))
+						r.Put("/", httputil.MakeHandler(s.taskController.UpdateTaskGroupGoal))
+					})
+
+					r.Route("/tasks", func(r fiber.Router) {
+						r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTasks))
+						r.Post("/", httputil.MakeHandler(s.taskController.CreateTask))
+
+						r.Route("/:task_id", func(r fiber.Router) {
+							r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTask))
+							r.Put("/", httputil.MakeHandler(s.taskController.UpdateTask))
+							r.Delete("/", httputil.MakeSimpleHandler(s.taskController.DeleteTask))
+
+							r.Route("/progress", func(r fiber.Router) {
+								r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTaskProgress))
+								r.Put("/", httputil.MakeHandler(s.taskController.UpdateTaskProgress))
+							})
+
+							r.Route("/links", func(r fiber.Router) {
+								r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTaskLinks))
+								r.Post("/", httputil.MakeHandler(s.taskController.CreateTaskLink))
+
+								r.Route("/:task_link_id", func(r fiber.Router) {
+									r.Put("/", httputil.MakeHandler(s.taskController.UpdateTaskLink))
+									r.Delete("/", httputil.MakeSimpleHandler(s.taskController.DeleteTaskLink))
+								})
+							})
+						})
+					})
 				})
 			})
 
 			r.Route("/tasks", func(r fiber.Router) {
 				r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTasks))
-				r.Get("/:task_id", httputil.MakeSimpleHandler(s.taskController.GetTask))
-				r.Get("/:task_id/links", httputil.MakeSimpleHandler(s.taskController.GetTaskLinks))
 
-				r.Route("/:task_id/progress", func(r fiber.Router) {
-					r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTaskProgress))
-					r.Put("/", httputil.MakeHandler(s.taskController.UpdateTaskProgress))
+				r.Route("/:task_id", func(r fiber.Router) {
+					r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTask))
+
+					r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTask))
+					r.Put("/", httputil.MakeHandler(s.taskController.UpdateTask))
+					r.Delete("/", httputil.MakeSimpleHandler(s.taskController.DeleteTask))
+
+					r.Route("/progress", func(r fiber.Router) {
+						r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTaskProgress))
+						r.Put("/", httputil.MakeHandler(s.taskController.UpdateTaskProgress))
+					})
+
+					r.Route("/links", func(r fiber.Router) {
+						r.Get("/", httputil.MakeSimpleHandler(s.taskController.GetTaskLinks))
+						r.Post("/", httputil.MakeHandler(s.taskController.CreateTaskLink))
+
+						r.Route("/:task_link_id", func(r fiber.Router) {
+							r.Put("/", httputil.MakeHandler(s.taskController.UpdateTaskLink))
+							r.Delete("/", httputil.MakeSimpleHandler(s.taskController.DeleteTaskLink))
+						})
+					})
 				})
 			})
 		})

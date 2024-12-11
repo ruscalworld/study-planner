@@ -5,6 +5,9 @@ import "github.com/ruscalworld/study-planner/internal/access"
 type Repository interface {
 	GetCurriculum(id int64) (*Curriculum, error)
 	CreateCurriculum(institutionId int64, curriculum *Curriculum) error
+	UpdateCurriculum(c *Curriculum) error
+	DeleteCurriculum(id int64) error
+
 	GetInstitutionCurriculums(institutionId int64) (*[]Curriculum, error)
 
 	GetCurriculumCodes(curriculumId int64) (*[]Code, error)

@@ -1,17 +1,14 @@
 package delivery
 
 import (
-	"regexp"
-
 	"github.com/ruscalworld/study-planner/internal/access"
 	"github.com/ruscalworld/study-planner/internal/curriculum"
 	"github.com/ruscalworld/study-planner/internal/institution"
 	"github.com/ruscalworld/study-planner/internal/user"
 
-	"github.com/ruscalworld/study-planner/pkg/httputil"
-	"github.com/ruscalworld/study-planner/pkg/stderrors"
-
 	"github.com/gofiber/fiber/v2"
+
+	"github.com/ruscalworld/study-planner/pkg/httputil"
 )
 
 type InstitutionController struct {
@@ -45,28 +42,15 @@ func (c *InstitutionController) GetInstitution(ctx *fiber.Ctx) (*institution.Ins
 	return c.institutionRepository.GetInstitution(id)
 }
 
-func (c *InstitutionController) GetCurriculums(ctx *fiber.Ctx) (*[]curriculum.Curriculum, error) {
-	id, err := httputil.ExtractId(ctx, "institution_id")
-	if err != nil {
-		return nil, err
-	}
-
-	return c.curriculumRepository.GetInstitutionCurriculums(id)
-}
-
 func (c *InstitutionController) CreateCurriculum(ctx *fiber.Ctx, request *institution.CreateCurriculumParams) (*curriculum.Curriculum, error) {
 	institutionId, err := httputil.ExtractId(ctx, "institution_id")
 	if err != nil {
 		return nil, err
 	}
 
-	nameValid, err := regexp.MatchString("^[a-zA-Zа-яА-Яё0-9.-]{3,}$", request.Name)
+	err = request.Validate()
 	if err != nil {
 		return nil, err
-	}
-
-	if !nameValid {
-		return nil, stderrors.BadRequest("name is not valid")
 	}
 
 	cu := &curriculum.Curriculum{

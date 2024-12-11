@@ -34,10 +34,22 @@ func (m *MySqlRepository) GetCurriculum(id int64) (*curriculum.Curriculum, error
 }
 
 func (m *MySqlRepository) CreateCurriculum(institutionId int64, c *curriculum.Curriculum) error {
-	result, err := m.db.Exec(
-		"insert into curriculums (name, semester, institution_id) values (?, ?, ?)",
-		c.Name, c.Semester, institutionId,
+	var (
+		result sql.Result
+		err    error
 	)
+
+	if institutionId < 0 {
+		result, err = m.db.Exec(
+			"insert into curriculums (name, semester) values (?, ?)",
+			c.Name, c.Semester,
+		)
+	} else {
+		result, err = m.db.Exec(
+			"insert into curriculums (name, semester, institution_id) values (?, ?, ?)",
+			c.Name, c.Semester, institutionId,
+		)
+	}
 
 	if err != nil {
 		return err
@@ -50,6 +62,16 @@ func (m *MySqlRepository) CreateCurriculum(institutionId int64, c *curriculum.Cu
 
 	c.ID = id
 	return nil
+}
+
+func (m *MySqlRepository) UpdateCurriculum(c *curriculum.Curriculum) error {
+	_, err := m.db.Exec("update curriculums set name = ?, semester = ? where id = ?", c.Name, c.Semester, c.ID)
+	return err
+}
+
+func (m *MySqlRepository) DeleteCurriculum(id int64) error {
+	_, err := m.db.Exec("delete from curriculums where id = ?", id)
+	return err
 }
 
 func (m *MySqlRepository) GetInstitutionCurriculums(institutionId int64) (*[]curriculum.Curriculum, error) {
@@ -113,7 +135,7 @@ func (m *MySqlRepository) GetCurriculumByCode(code string) (*curriculum.Privileg
 
 func (m *MySqlRepository) GetCurriculumPrivileges(curriculumId int64, userId int64) (*access.CurriculumPrivileges, error) {
 	var cp access.CurriculumPrivileges
-	err := m.db.Get(&cp, "select c.id as curriculum_id, uc.role as role from curriculums c join user_curriculums uc where c.id = ? and uc.user_id = ?", curriculumId, userId)
+	err := m.db.Get(&cp, "select c.id as curriculum_id, uc.role as role from curriculums c join user_curriculums uc on c.id = uc.curriculum_id where c.id = ? and uc.user_id = ?", curriculumId, userId)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

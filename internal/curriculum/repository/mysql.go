@@ -159,7 +159,25 @@ func (m *MySqlRepository) GetCurriculumUsers(curriculumId int64) (*[]curriculum.
 	return &cu, nil
 }
 
-func (m *MySqlRepository) DeleteCurriculumUser(curriculumId int64, userId int64) error {
-	_, err := m.db.Exec("delete from user_curriculums where curriculum_id = ? and user_id = ?", curriculumId, userId)
+func (m *MySqlRepository) UpdateCurriculumUser(curriculumId int64, userId int64, role access.Role) error {
+	_, err := m.db.Exec("update user_curriculums set role = ? where curriculum_id = ? and user_id = ?", role, curriculumId, userId)
 	return err
+}
+
+func (m *MySqlRepository) DeleteCurriculumUser(curriculumId int64, userId int64) error {
+	result, err := m.db.Exec("delete from user_curriculums where curriculum_id = ? and user_id = ?", curriculumId, userId)
+	if err != nil {
+		return err
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return curriculum.ErrUnknownCurriculumUser
+	}
+
+	return nil
 }

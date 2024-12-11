@@ -8,7 +8,8 @@ import (
 )
 
 var (
-	ErrUnknownCurriculum = stderrors.NotFound("unknown curriculum")
+	ErrUnknownCurriculum     = stderrors.NotFound("unknown curriculum")
+	ErrUnknownCurriculumUser = stderrors.NotFound("unknown curriculum user")
 )
 
 type Curriculum struct {
@@ -63,4 +64,8 @@ func (p *Params) Validate() error {
 	}
 
 	return nil
+}
+
+type UpdateCurriculumUserParams struct {
+	Role access.Role `json:"role"`
 }

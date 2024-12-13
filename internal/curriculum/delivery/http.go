@@ -20,8 +20,14 @@ type CurriculumController struct {
 	userRepository       user.Repository
 }
 
-func NewCurriculumController(curriculumRepository curriculum.Repository, userRepository user.Repository) *CurriculumController {
-	return &CurriculumController{curriculumRepository: curriculumRepository, userRepository: userRepository}
+func NewCurriculumController(
+	curriculumRepository curriculum.Repository,
+	userRepository user.Repository,
+) *CurriculumController {
+	return &CurriculumController{
+		curriculumRepository: curriculumRepository,
+		userRepository:       userRepository,
+	}
 }
 
 func (c *CurriculumController) GetCurriculum(ctx *fiber.Ctx) (*curriculum.Curriculum, error) {

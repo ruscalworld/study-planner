@@ -6,6 +6,7 @@ import (
 
 	"github.com/ruscalworld/study-planner/internal/auth"
 
+	"github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"
 )
 
@@ -23,11 +24,21 @@ type AuthenticationConfig struct {
 
 type OAuthPlatform struct {
 	config   *oauth2.Config
-	supplier UserInfoSupplier
+	provider *oidc.Provider
+	verifier *oidc.IDTokenVerifier
 }
 
-func NewOAuthPlatform(config *oauth2.Config, supplier UserInfoSupplier) *OAuthPlatform {
-	return &OAuthPlatform{config: config, supplier: supplier}
+func NewOAuthPlatform(config *oauth2.Config, oidIssuer string) (*OAuthPlatform, error) {
+	provider, err := oidc.NewProvider(context.Background(), oidIssuer)
+	if err != nil {
+		return nil, err
+	}
+
+	return &OAuthPlatform{
+		config:   config,
+		provider: provider,
+		verifier: provider.Verifier(&oidc.Config{ClientID: config.ClientID}),
+	}, nil
 }
 
 func (p *OAuthPlatform) GetAuthenticationConfig(_ context.Context) (*AuthenticationConfig, error) {
@@ -42,5 +53,25 @@ func (p *OAuthPlatform) Authenticate(ctx context.Context, request *CodeRequest) 
 		return nil, fmt.Errorf("code exchange: %s", err)
 	}
 
-	return p.supplier.GetUserInfo(token)
+	rawIdToken, ok := token.Extra("id_token").(string)
+	if !ok {
+		return nil, fmt.Errorf("id_token is missing or is not a string")
+	}
+
+	idToken, err := p.verifier.Verify(ctx, rawIdToken)
+	if err != nil {
+		return nil, fmt.Errorf("id token verification: %s", err)
+	}
+
+	var u GoogleUser
+	if err := idToken.Claims(&u); err != nil {
+		return nil, fmt.Errorf("parsing claims: %s", err)
+	}
+
+	return &auth.UserInfo{
+		ExternalID: u.ID,
+		Platform:   "google",
+		Name:       u.Name,
+		AvatarURL:  u.Picture,
+	}, nil
 }

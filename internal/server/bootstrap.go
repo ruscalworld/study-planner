@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"golang.org/x/oauth2/google"
+
 	"github.com/ruscalworld/study-planner/internal/auth"
 	"github.com/ruscalworld/study-planner/internal/auth/manager"
 	"github.com/ruscalworld/study-planner/internal/auth/platform"
@@ -118,6 +120,13 @@ var (
 		Value:   "http://localhost:5173/auth/callback",
 		EnvVars: []string{"OAUTH_REDIRECT_URL"},
 	}
+
+	FlagOpenIdIssuer = &cli.StringFlag{
+		Name:    "open-id-issuer",
+		Usage:   "Issuer URL for OpenID Connect",
+		Value:   "https://accounts.google.com",
+		EnvVars: []string{"OPENID_ISSUER"},
+	}
 )
 
 func RunApp(ctx *cli.Context) error {
@@ -213,17 +222,13 @@ func initAuthManager(ctx *cli.Context, userRepo user.Repository) (auth.Manager, 
 }
 
 func initAuthPlatform(ctx *cli.Context) (auth.Platform[platform.AuthenticationConfig, platform.CodeRequest], error) {
-	// Hardcoded config for Discord OAuth
 	cfg := &oauth2.Config{
 		ClientID:     ctx.String(FlagClientId.Name),
 		ClientSecret: ctx.String(FlagClientSecret.Name),
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  "https://discord.com/oauth2/authorize",
-			TokenURL: "https://discord.com/api/oauth2/token",
-		},
-		RedirectURL: ctx.String(FlagRedirectUrl.Name),
-		Scopes:      []string{"identify"},
+		Endpoint:     google.Endpoint,
+		RedirectURL:  ctx.String(FlagRedirectUrl.Name),
+		Scopes:       []string{"openid", "https://www.googleapis.com/auth/userinfo.profile"},
 	}
 
-	return platform.NewOAuthPlatform(cfg, platform.NewDiscordUserSupplier()), nil
+	return platform.NewOAuthPlatform(cfg, ctx.String(FlagOpenIdIssuer.Name))
 }

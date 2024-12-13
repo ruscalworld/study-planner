@@ -36,6 +36,7 @@ func main() {
 					server.FlagClientId,
 					server.FlagClientSecret,
 					server.FlagRedirectUrl,
+					server.FlagOpenIdIssuer,
 				},
 			},
 		},

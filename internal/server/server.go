@@ -7,6 +7,7 @@ import (
 	"github.com/ruscalworld/study-planner/internal/curriculum"
 	"github.com/ruscalworld/study-planner/internal/discipline"
 	"github.com/ruscalworld/study-planner/internal/institution"
+	"github.com/ruscalworld/study-planner/internal/stats"
 	"github.com/ruscalworld/study-planner/internal/task"
 	"github.com/ruscalworld/study-planner/internal/user"
 
@@ -27,6 +28,7 @@ type Server[AC, AT comparable] struct {
 	taskController        task.Controller
 	userController        user.Controller
 	authController        auth.Controller[AC, AT]
+	statsController       stats.Controller
 
 	authManager    auth.Manager
 	allowedOrigins map[string]bool
@@ -100,6 +102,8 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 					r.Put("/:user_id", httputil.MakeHandler(s.curriculumController.UpdateCurriculumUser))
 					r.Delete("/:user_id", httputil.MakeSimpleHandler(s.curriculumController.DeleteCurriculumUser))
 				})
+
+				r.Get("/tasks", httputil.MakeSimpleHandler(s.statsController.GetUndoneUpcomingTasks))
 			})
 		})
 

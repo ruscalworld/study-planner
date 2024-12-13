@@ -14,6 +14,7 @@ import (
 	curriculumRepository "github.com/ruscalworld/study-planner/internal/curriculum/repository"
 	disciplineRepository "github.com/ruscalworld/study-planner/internal/discipline/repository"
 	institutionRepository "github.com/ruscalworld/study-planner/internal/institution/repository"
+	statsRepository "github.com/ruscalworld/study-planner/internal/stats/repository"
 	taskRepository "github.com/ruscalworld/study-planner/internal/task/repository"
 	userRepository "github.com/ruscalworld/study-planner/internal/user/repository"
 
@@ -21,6 +22,7 @@ import (
 	curriculumDelivery "github.com/ruscalworld/study-planner/internal/curriculum/delivery"
 	disciplineDelivery "github.com/ruscalworld/study-planner/internal/discipline/delivery"
 	institutionDelivery "github.com/ruscalworld/study-planner/internal/institution/delivery"
+	statsDelivery "github.com/ruscalworld/study-planner/internal/stats/delivery"
 	taskDelivery "github.com/ruscalworld/study-planner/internal/task/delivery"
 	userDelivery "github.com/ruscalworld/study-planner/internal/user/delivery"
 
@@ -135,6 +137,7 @@ func RunApp(ctx *cli.Context) error {
 		institutionRepo = institutionRepository.NewMySqlRepository(db)
 		taskRepo        = taskRepository.NewMySqlRepository(db)
 		userRepo        = userRepository.NewMySqlRepository(db)
+		statsRepo       = statsRepository.NewMySqlRepository(db)
 	)
 
 	log.Println("initializing auth manager")
@@ -156,6 +159,7 @@ func RunApp(ctx *cli.Context) error {
 		taskController:        taskDelivery.NewTaskController(disciplineRepo, taskRepo, userRepo),
 		userController:        userDelivery.NewUserController(userRepo, curriculumRepo),
 		authController:        authDelivery.NewAuthController(userRepo, authPlatform, authManager),
+		statsController:       statsDelivery.NewStatsController(curriculumRepo, statsRepo),
 
 		authManager:    authManager,
 		allowedOrigins: allowedOrigins(ctx),

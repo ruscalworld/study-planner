@@ -126,8 +126,8 @@ func (m *MySqlRepository) CreateTask(taskGroupId int64, t *task.Task) error {
 
 func (m *MySqlRepository) UpdateTask(t *task.Task) error {
 	_, err := m.db.Exec(
-		"update tasks set name = ?, external_name = ?, description = ?, deadline = ?, difficulty = ? where id = ?",
-		t.Name, t.ExternalName, t.Description, t.Deadline, t.Difficulty, t.ID,
+		"update tasks set name = ?, external_name = ?, description = ?, status = ?, deadline = ?, difficulty = ? where id = ?",
+		t.Name, t.ExternalName, t.Description, t.Status, t.Deadline, t.Difficulty, t.ID,
 	)
 
 	return err

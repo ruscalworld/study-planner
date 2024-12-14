@@ -6,8 +6,6 @@ import (
 	"log"
 	"time"
 
-	"golang.org/x/oauth2/google"
-
 	"github.com/ruscalworld/study-planner/internal/auth"
 	"github.com/ruscalworld/study-planner/internal/auth/manager"
 	"github.com/ruscalworld/study-planner/internal/auth/platform"
@@ -34,6 +32,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 
 	_ "github.com/go-sql-driver/mysql"
 )

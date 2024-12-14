@@ -16,7 +16,7 @@ type UserInfoSupplier interface {
 
 type CodeRequest struct {
 	Code    string `json:"code"`
-	IdToken string `json:"id_token"`
+	IdToken string `json:"idToken"`
 }
 
 type AuthenticationConfig struct {

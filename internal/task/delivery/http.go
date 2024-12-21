@@ -342,12 +342,17 @@ func (c *TaskController) UpdateTask(ctx *fiber.Ctx, params *task.Params) (*task.
 }
 
 func (c *TaskController) DeleteTask(ctx *fiber.Ctx) (*any, error) {
+	disciplineId, err := httputil.ExtractId(ctx, "discipline_id")
+	if err != nil {
+		return nil, err
+	}
+
 	taskId, err := httputil.ExtractId(ctx, "task_id")
 	if err != nil {
 		return nil, err
 	}
 
-	err = auth.Authorize(ctx, c.taskRepository.GetCurriculumPrivileges, auth.LevelPublic, auth.ActionUpdate, taskId)
+	err = auth.Authorize(ctx, c.disciplineRepository.GetCurriculumPrivileges, auth.LevelPublic, auth.ActionUpdate, disciplineId)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,8 @@
 package delivery
 
 import (
+	"encoding/base64"
+
 	"github.com/ruscalworld/study-planner/internal/auth"
 	"github.com/ruscalworld/study-planner/internal/user"
 	"github.com/ruscalworld/study-planner/pkg/stderrors"
@@ -40,14 +42,16 @@ func (a *AuthController[C, T]) Authenticate(ctx *fiber.Ctx, credentials *T) (*au
 	return a.authManager.Authenticate(userInfo)
 }
 
-func (a *AuthController[C, T]) Refresh(ctx *fiber.Ctx) (*auth.Token, error) {
-	// Incredibly simple way to refresh token. The only problem this mechanism solves is automatic sign-out if user
-	// do not use app for a long time.
-	userId := ctx.Locals("userid").(int64)
-	u, err := a.userRepository.GetUserById(userId)
+func (a *AuthController[C, T]) Refresh(_ *fiber.Ctx, request *auth.RefreshRequest) (*auth.Token, error) {
+	rawToken, err := base64.StdEncoding.DecodeString(request.RefreshToken)
+	if err != nil {
+		return nil, stderrors.UnprocessableEntity("invalid refresh token")
+	}
+
+	newToken, err := a.authManager.Refresh(rawToken)
 	if err != nil {
 		return nil, err
 	}
 
-	return a.authManager.GetTokenProvider().MakeToken(u)
+	return newToken, nil
 }

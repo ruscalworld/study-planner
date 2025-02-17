@@ -9,8 +9,10 @@ import (
 	"github.com/ruscalworld/study-planner/internal/auth"
 	"github.com/ruscalworld/study-planner/internal/auth/manager"
 	"github.com/ruscalworld/study-planner/internal/auth/platform"
+	"github.com/ruscalworld/study-planner/internal/auth/refresh"
 	"github.com/ruscalworld/study-planner/internal/auth/token"
 
+	refreshRepository "github.com/ruscalworld/study-planner/internal/auth/refresh/repository"
 	curriculumRepository "github.com/ruscalworld/study-planner/internal/curriculum/repository"
 	disciplineRepository "github.com/ruscalworld/study-planner/internal/discipline/repository"
 	institutionRepository "github.com/ruscalworld/study-planner/internal/institution/repository"
@@ -92,11 +94,18 @@ var (
 		EnvVars: []string{"JWT_AUDIENCE"},
 	}
 
-	FlagTokenLifetime = &cli.DurationFlag{
-		Name:    "token-lifetime",
-		Usage:   "Lifetime of authorization tokens",
+	FlagAccessTokenLifetime = &cli.DurationFlag{
+		Name:    "access-token-lifetime",
+		Usage:   "Lifetime of access tokens",
 		Value:   24 * time.Hour,
-		EnvVars: []string{"TOKEN_LIFETIME"},
+		EnvVars: []string{"ACCESS_TOKEN_LIFETIME"},
+	}
+
+	FlagRefreshTokenLifetime = &cli.DurationFlag{
+		Name:    "refresh-token-lifetime",
+		Usage:   "Lifetime of refresh tokens",
+		Value:   24 * 30 * time.Hour,
+		EnvVars: []string{"REFRESH_TOKEN_LIFETIME"},
 	}
 
 	FlagClientId = &cli.StringFlag{
@@ -146,10 +155,11 @@ func RunApp(ctx *cli.Context) error {
 		taskRepo        = taskRepository.NewMySqlRepository(db)
 		userRepo        = userRepository.NewMySqlRepository(db)
 		statsRepo       = statsRepository.NewMySqlRepository(db)
+		refreshRepo     = refreshRepository.NewMySqlRepository(db)
 	)
 
 	log.Println("initializing auth manager")
-	authManager, err := initAuthManager(ctx, userRepo)
+	authManager, err := initAuthManager(ctx, userRepo, refreshRepo)
 	if err != nil {
 		return err
 	}
@@ -205,7 +215,7 @@ func allowedOrigins(ctx *cli.Context) map[string]bool {
 	return result
 }
 
-func initAuthManager(ctx *cli.Context, userRepo user.Repository) (auth.Manager, error) {
+func initAuthManager(ctx *cli.Context, userRepo user.Repository, refreshRepo refresh.Repository) (auth.Manager, error) {
 	signingKey, err := base64.StdEncoding.DecodeString(ctx.String(FlagSigningKey.Name))
 	if err != nil {
 		return nil, fmt.Errorf("invalid signing key: %s", err)
@@ -214,7 +224,9 @@ func initAuthManager(ctx *cli.Context, userRepo user.Repository) (auth.Manager, 
 	tokenProvider := token.NewJwtTokenProvider(
 		signingKey,
 		ctx.String(FlagAudience.Name),
-		ctx.Duration(FlagTokenLifetime.Name),
+		ctx.Duration(FlagAccessTokenLifetime.Name),
+		ctx.Duration(FlagRefreshTokenLifetime.Name),
+		refreshRepo,
 	)
 
 	return manager.NewAuthManager(userRepo, tokenProvider), nil

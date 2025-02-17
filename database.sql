@@ -111,3 +111,15 @@ CREATE TABLE IF NOT EXISTS `user_task_progress`
 
     UNIQUE `task_id` (`task_id`, `user_id`)
 );
+
+CREATE TABLE IF NOT EXISTS `refresh_tokens`
+(
+    `id`         bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `user_id`    bigint(20) NOT NULL REFERENCES `users` (`id`),
+    `prefix`     binary(8)  NOT NULL,
+    `token`      binary(32) NOT NULL,
+    `created_at` timestamp  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `expires_at` timestamp  NOT NULL,
+
+    UNIQUE (`user_id`, `prefix`)
+);

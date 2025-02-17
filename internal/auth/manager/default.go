@@ -61,6 +61,20 @@ func (d *Default) Authorize(token *auth.Token) (*auth.TokenInfo, error) {
 	return tokenInfo, nil
 }
 
+func (d *Default) Refresh(rawToken []byte) (*auth.Token, error) {
+	token, err := d.tokenProvider.UseRefreshToken(rawToken)
+	if err != nil {
+		return nil, err
+	}
+
+	u, err := d.userRepository.GetUserById(token.UserId)
+	if err != nil {
+		return nil, fmt.Errorf("fetching user: %w", err)
+	}
+
+	return d.tokenProvider.MakeToken(u)
+}
+
 func (d *Default) GetTokenProvider() auth.TokenProvider {
 	return d.tokenProvider
 }

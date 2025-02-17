@@ -31,7 +31,8 @@ func main() {
 
 					server.FlagSigningKey,
 					server.FlagAudience,
-					server.FlagTokenLifetime,
+					server.FlagAccessTokenLifetime,
+					server.FlagRefreshTokenLifetime,
 
 					server.FlagClientId,
 					server.FlagClientSecret,

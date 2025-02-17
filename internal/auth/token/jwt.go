@@ -1,11 +1,13 @@
 package token
 
 import (
+	"encoding/base64"
 	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/ruscalworld/study-planner/internal/auth"
+	"github.com/ruscalworld/study-planner/internal/auth/refresh"
 	"github.com/ruscalworld/study-planner/internal/user"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -17,13 +19,27 @@ const (
 )
 
 type JwtTokenProvider struct {
-	signingKey    []byte
-	audience      string
-	tokenLifetime time.Duration
+	signingKey           []byte
+	audience             string
+	accessTokenLifetime  time.Duration
+	refreshTokenLifetime time.Duration
+	refreshRepository    refresh.Repository
 }
 
-func NewJwtTokenProvider(signingKey []byte, audience string, tokenLifetime time.Duration) *JwtTokenProvider {
-	return &JwtTokenProvider{signingKey: signingKey, audience: audience, tokenLifetime: tokenLifetime}
+func NewJwtTokenProvider(
+	signingKey []byte,
+	audience string,
+	accessTokenLifetime time.Duration,
+	refreshTokenLifetime time.Duration,
+	refreshRepository refresh.Repository,
+) *JwtTokenProvider {
+	return &JwtTokenProvider{
+		signingKey:           signingKey,
+		audience:             audience,
+		accessTokenLifetime:  accessTokenLifetime,
+		refreshTokenLifetime: refreshTokenLifetime,
+		refreshRepository:    refreshRepository,
+	}
 }
 
 type Claims struct {
@@ -31,16 +47,27 @@ type Claims struct {
 }
 
 func (j *JwtTokenProvider) MakeToken(u *user.User) (*auth.Token, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, j.makeClaims(u))
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, j.makeClaims(u))
 
-	signedToken, err := token.SignedString(j.signingKey)
+	signedToken, err := accessToken.SignedString(j.signingKey)
 	if err != nil {
 		return nil, err
 	}
 
+	refreshToken, err := refresh.MakeToken(u.ID, j.refreshTokenLifetime)
+	if err != nil {
+		return nil, fmt.Errorf("generating refresh token: %w", err)
+	}
+
+	err = j.refreshRepository.CreateToken(&refreshToken.Token)
+	if err != nil {
+		return nil, fmt.Errorf("saving refresh token: %w", err)
+	}
+
 	return &auth.Token{
-		AccessToken: signedToken,
-		TokenType:   tokenType,
+		AccessToken:  signedToken,
+		RefreshToken: base64.StdEncoding.EncodeToString(refreshToken.RawToken),
+		TokenType:    tokenType,
 	}, nil
 }
 
@@ -50,7 +77,7 @@ func (j *JwtTokenProvider) makeClaims(u *user.User) *Claims {
 			Issuer:    jwtIssuer,
 			Audience:  jwt.ClaimStrings{j.audience},
 			Subject:   fmt.Sprintf("%d", u.ID),
-			ExpiresAt: &jwt.NumericDate{Time: time.Now().Add(j.tokenLifetime)},
+			ExpiresAt: &jwt.NumericDate{Time: time.Now().Add(j.accessTokenLifetime)},
 			IssuedAt:  &jwt.NumericDate{Time: time.Now()},
 		},
 	}
@@ -74,6 +101,24 @@ func (j *JwtTokenProvider) Verify(token *auth.Token) (*auth.TokenInfo, error) {
 	}
 
 	return tokenInfo, nil
+}
+
+func (j *JwtTokenProvider) UseRefreshToken(rawToken []byte) (*refresh.Token, error) {
+	if len(rawToken) != refresh.TokenLength {
+		return nil, refresh.ErrInvalidToken
+	}
+
+	token, err := j.refreshRepository.GetValidToken(rawToken[:refresh.PrefixLength])
+	if err != nil {
+		return nil, err
+	}
+
+	err = j.refreshRepository.DeleteToken(token.ID)
+	if err != nil {
+		return nil, fmt.Errorf("deleting refresh token: %w", err)
+	}
+
+	return token, nil
 }
 
 func (j *JwtTokenProvider) verifyClaims(claims jwt.Claims) (*auth.TokenInfo, error) {

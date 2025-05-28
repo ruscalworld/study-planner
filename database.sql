@@ -123,3 +123,11 @@ CREATE TABLE IF NOT EXISTS `refresh_tokens`
 
     UNIQUE (`user_id`, `prefix`)
 );
+
+CREATE TABLE IF NOT EXISTS `drafts`
+(
+    `id`         bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `user_id`    bigint(20) NOT NULL REFERENCES `users` (`id`),
+    `text`       text       NOT NULL,
+    `created_at` timestamp DEFAULT CURRENT_TIMESTAMP
+);

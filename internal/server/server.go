@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/ruscalworld/study-planner/internal/auth"
 	"github.com/ruscalworld/study-planner/internal/auth/delivery"
+	"github.com/ruscalworld/study-planner/internal/draft"
 
 	"github.com/ruscalworld/study-planner/internal/curriculum"
 	"github.com/ruscalworld/study-planner/internal/discipline"
@@ -29,6 +30,7 @@ type Server[AC, AT comparable] struct {
 	userController        user.Controller
 	authController        auth.Controller[AC, AT]
 	statsController       stats.Controller
+	draftController       draft.Controller
 
 	authManager    auth.Manager
 	allowedOrigins map[string]bool
@@ -201,6 +203,20 @@ func (s *Server[AC, AT]) MakeApp() *fiber.App {
 					r.Use(authMiddleware)
 					r.Post("/", httputil.MakeHandler(s.institutionController.CreateCurriculum))
 				})
+			})
+		})
+
+		r.Route("/drafts", func(r fiber.Router) {
+			r.Use(authMiddleware)
+
+			r.Get("/", httputil.MakeSimpleHandler(s.draftController.GetDrafts))
+			r.Post("/", httputil.MakeHandler(s.draftController.CreateDraft))
+
+			r.Route("/:draft_id", func(r fiber.Router) {
+				r.Put("/", httputil.MakeHandler(s.draftController.UpdateDraft))
+				r.Delete("/", httputil.MakeSimpleHandler(s.draftController.DeleteDraft))
+
+				r.Post("/task", httputil.MakeHandler(s.draftController.MoveDraft))
 			})
 		})
 	})

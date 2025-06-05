@@ -15,6 +15,7 @@ import (
 	refreshRepository "github.com/ruscalworld/study-planner/internal/auth/refresh/repository"
 	curriculumRepository "github.com/ruscalworld/study-planner/internal/curriculum/repository"
 	disciplineRepository "github.com/ruscalworld/study-planner/internal/discipline/repository"
+	draftRepository "github.com/ruscalworld/study-planner/internal/draft/repository"
 	institutionRepository "github.com/ruscalworld/study-planner/internal/institution/repository"
 	statsRepository "github.com/ruscalworld/study-planner/internal/stats/repository"
 	taskRepository "github.com/ruscalworld/study-planner/internal/task/repository"
@@ -23,6 +24,7 @@ import (
 	authDelivery "github.com/ruscalworld/study-planner/internal/auth/delivery"
 	curriculumDelivery "github.com/ruscalworld/study-planner/internal/curriculum/delivery"
 	disciplineDelivery "github.com/ruscalworld/study-planner/internal/discipline/delivery"
+	draftDelivery "github.com/ruscalworld/study-planner/internal/draft/delivery"
 	institutionDelivery "github.com/ruscalworld/study-planner/internal/institution/delivery"
 	statsDelivery "github.com/ruscalworld/study-planner/internal/stats/delivery"
 	taskDelivery "github.com/ruscalworld/study-planner/internal/task/delivery"
@@ -156,6 +158,7 @@ func RunApp(ctx *cli.Context) error {
 		userRepo        = userRepository.NewMySqlRepository(db)
 		statsRepo       = statsRepository.NewMySqlRepository(db)
 		refreshRepo     = refreshRepository.NewMySqlRepository(db)
+		draftRepo       = draftRepository.NewMySqlRepository(db)
 	)
 
 	log.Println("initializing auth manager")
@@ -178,6 +181,7 @@ func RunApp(ctx *cli.Context) error {
 		userController:        userDelivery.NewUserController(userRepo, curriculumRepo),
 		authController:        authDelivery.NewAuthController(userRepo, authPlatform, authManager),
 		statsController:       statsDelivery.NewStatsController(curriculumRepo, statsRepo),
+		draftController:       draftDelivery.NewDraftController(draftRepo, taskRepo),
 
 		authManager:    authManager,
 		allowedOrigins: allowedOrigins(ctx),
